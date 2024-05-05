@@ -19,7 +19,9 @@ class Dataselect():
         
     # @st.cache 
     def init_db(self):
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        
+        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             self.db_init = engine.connect()
@@ -350,3 +352,16 @@ class Dataselect():
             raise ValueError("Invalid term option")
 
         return term, term_flag
+
+    def marketcondition(self,date,flag):
+        sql = f"exec stock.[DBO].[SL_GetMainDashBoard] ?, ?"
+        params = (date,flag)
+        df = pd.read_sql(sql, con=self.db_init, params=params)
+        percent_columns = ['D1','W1', 'W3', 'M1', 'M3', 'M6', 'M12', 'M24', 'M36']
+        for col in percent_columns:
+            df[col]=round(df[col].astype(float)*100,2)
+        return df
+
+
+
+

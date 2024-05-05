@@ -31,7 +31,71 @@ if __name__ == "__main__":
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
     # Using object notation
-    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("📈시장지수","🎭테마수익률","📊주식분석",'🔖관심종목','💹옵션분석'))
+    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟메인","📈시장지수","🎭테마수익률","📊주식분석",'🔖관심종목','💹옵션분석'))
+
+
+    if date and add_selectbox=="🌟메인":
+        st.subheader('🌟메인')
+        st.write('조회일 : ',date)
+
+
+        col1, col2 = st.columns(2)
+        with st.container():      
+            with col1:
+                st.markdown('**시장지수**')
+                df = class_data.marketcondition(date,2)
+                st.dataframe(df , use_container_width=True)
+            with col2:
+                st.markdown('**상품**')
+                df = class_data.marketcondition(date,3)
+                st.dataframe(df , use_container_width=True)
+        col3, col4 = st.columns(2)
+        with st.container():      
+            with col3:
+                st.markdown('**환율**')
+                df = class_data.marketcondition(date,4)
+                st.dataframe(df , use_container_width=True)
+            with col4:
+                st.markdown('**채권**')
+                df = class_data.marketcondition(date,5)
+                st.dataframe(df , use_container_width=True)
+        col5, col6 = st.columns(2)
+        with st.container():      
+            with col5:
+                st.markdown('**코스피 주간 Top 10**')
+                df = class_data.marketcondition(date,6)
+                st.dataframe(df , use_container_width=True)
+
+            with col6:
+                st.markdown('**코스닥 주간 top 10**')
+                df = class_data.marketcondition(date,7)
+                st.dataframe(df , use_container_width=True)
+
+        col7, col8 = st.columns(2)
+        with st.container():      
+            with col5:
+                st.markdown('**코넥스 주간 Top 10**')
+                df = class_data.marketcondition(date,9)
+                st.dataframe(df , use_container_width=True)
+
+            with col6:
+                st.markdown('**K-OTC 주간 Top 10**')
+                df = class_data.marketcondition(date,10)
+                st.dataframe(df , use_container_width=True)
+
+        col9, col10 = st.columns(2)
+        with st.container():      
+            with col9:
+                st.markdown('**ETF 주간 Top 10**')
+                df = class_data.marketcondition(date,8)
+                st.dataframe(df , use_container_width=True)
+
+            with col10:
+                st.markdown('**ETF 주간 Bottom 10**')
+                df = class_data.marketcondition(date,13)
+                st.dataframe(df , use_container_width=True)
+
+
     if date and add_selectbox=="🎭테마수익률":
         st.subheader('📈테마수익률 현황')
         st.write('조회일 : ',date)
