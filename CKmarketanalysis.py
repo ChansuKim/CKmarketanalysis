@@ -408,7 +408,7 @@ if __name__ == "__main__":
                 df_theme_return.set_index('logdate', inplace=True)
                 st.line_chart(df_theme_return)
                 df_theme_stocks = class_data.getthemestock(date, selected_themecode,1)
-                st.dataframe(df_theme_stocks, use_container_width=st.session_state.use_container_width)
+                st.dataframe(df_theme_stocks, use_container_width=True)
 
 
 
