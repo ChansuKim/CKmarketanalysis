@@ -4,6 +4,15 @@ import pandas as pd
 import plotly.express as px
 
 
+def generate_table(dataframe):
+    header = "<tr>" + "".join([f"<th>{col}</th>" for col in dataframe.columns]) + "</tr>"
+    rows = []
+    for _, row in dataframe.iterrows():
+        rows.append("<tr>" + "".join([
+            f'<td><a href="{row["URL"]}" target="_blank"><i class="fas fa-link"></i></a></td>' if col == 'URL' else f"<td>{value}</td>" 
+            for col, value in row.items()]) + "</tr>")
+    return "<table>" + header + "".join(rows) + "</table>"
+
 if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market wizard")    
     st.header('🌍 CK Market wizard')
@@ -177,9 +186,10 @@ if __name__ == "__main__":
         selected_stock, stockname = stock_options[stock_choice]
         df = class_data.getthemestock(date, selected_stock, 2)
         df_aftermarket = class_data.getAftermarketprice(date, selected_stock, 4)
+
+        df_gongsi = class_data.getstockgongsi(date, selected_stock)
         st.dataframe(df, use_container_width=True)
         st.dataframe(df_aftermarket)
-
 
         col7, col8 = st.columns(2)
         
@@ -197,6 +207,13 @@ if __name__ == "__main__":
             fig_d.update_layout(autosize=True)
             st.plotly_chart(fig_d, use_container_width=True)
 
+        # st.dataframe(df_gongsi)
+
+        st.markdown("""
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+        """, unsafe_allow_html=True)
+        html_table = generate_table(df_gongsi)
+        st.markdown(html_table, unsafe_allow_html=True)
 
     if date and add_selectbox=="🔖관심종목":
         maxdate = class_data.getmaxdate(todate,1)

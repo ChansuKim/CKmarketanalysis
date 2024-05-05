@@ -19,7 +19,9 @@ class Dataselect():
         
     # @st.cache 
     def init_db(self):
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        
+        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             self.db_init = engine.connect()
@@ -57,6 +59,19 @@ class Dataselect():
             df.drop(['logdate', 'logtime'], axis=1, inplace=True)
         return df
     
+    def getstockgongsi(self,date,code):
+        todate = int(str(date).replace('-',''))
+
+        sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
+        params = ('',todate, code, int(8))
+        df = pd.read_sql(sql, con=self.db_init,params=params)
+        df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
+        df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
+        cols = ['logdate', 'logtime']
+        df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
+        df.drop(['logdate', 'logtime'], axis=1, inplace=True)
+        return df
+
     def getoptionprice(self,date,frame,otm,cpflag,termflag,term):
         todate = int(str(date).replace('-',''))
         if frame=='d':
