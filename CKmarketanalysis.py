@@ -1,348 +1,11 @@
 import streamlit as st
-import datetime
-from sqlalchemy import create_engine
-from sqlalchemy import text
+from data_selection import Dataselect  # Assuming you have a separate module for data handling
 import pandas as pd
-from datetime import datetime
 import plotly.express as px
-import plotly.graph_objects as go
-
-showErrorDetails = False
-
-class Dataselect():
-    def __init__(self, date,server, database, user_id, password):
-        self.server = server
-        self.database = database
-        self.user_id = user_id
-        self.password = password
-        self.date = date
-        
-    
-    def init_db(self):
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
-        engine = create_engine(connection_string, echo=False)
-        try:
-            self.db_init = engine.connect()
-            return self.db_init
-        except Exception as e:
-            st.error(f"Failed to connect to database: {e}")
-            return None
-
-
-    def getCalendar(self, date, termflag, term):
-        todate = int(str(date).replace('-', ''))
-        sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
-            '''
-        params = (todate,2, termflag, term)
-        df = pd.read_sql(sql, con=self.db_init, params=params)
-        frdate = int(df['frdate'][0])
-        return frdate 
-
-    def getstockprice(self,date,code,frame):
-        todate = int(str(date).replace('-',''))
-        if frame=='D':
-            frdate = self.getCalendar(todate,'m','1')
-            sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
-            params = (frdate,'', code, int(5))
-            df = pd.read_sql(sql, con=self.db_init, params=params)
-        else:
-            sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
-            params = ('',todate, code, int(6))
-            df = pd.read_sql(sql, con=self.db_init,params=params)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
-            df.drop(['logdate', 'logtime'], axis=1, inplace=True)
-        return df
-    
-    def getoptionprice(self,date,frame,otm,cpflag,termflag,term):
-        todate = int(str(date).replace('-',''))
-        if frame=='d':
-            frdate = self.getCalendar(todate,termflag,term)
-            sql= '''
-            EXEC stock.[dbo].[SL_GetOption] {},{},{},{},{}
-            '''.format(frdate,todate,'D',otm,cpflag)            
-            df = pd.read_sql(sql, con=self.db_init)
-            df['logdate'] =pd.to_datetime(df['logdate'])
-            
-        else:
-            sql = '''
-            EXEC stock.[dbo].[SL_GetOption] {},{},{},{},{}
-            '''.format(todate,todate,'m',otm,cpflag)
-            df = pd.read_sql(sql, con=self.db_init)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
-            df.drop(['logdate', 'logtime'], axis=1, inplace=True)
-            df['datetime'] =pd.to_datetime(df['datetime'])
-        return df
-    
-    def getstockmater(self,date):
-        todate = int(str(date).replace('-',''))
-        sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
-            '''
-        params = (todate,1,'','')
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-        return df[['stockcode','stockname']]
-    
-    def getinterestedstocklist(self):
-        sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
-            '''
-        params = (todate,3,'','')
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-        return df
-    
-    def insert_interested_stock(self,interestname,stock_code, stock_name):
-        if self.db_init is None:
-            st.error("Database connection is not established.")
-            return
-        try:
-            # Create a SQL statement
-            sql_statement = text("INSERT INTO stock.dbo.tc_InterestedStocks (stockcode, stockname,ipuser,ipdate) VALUES (:interestname ,:code, :name,:ipuser,:ipdate)")
-            
-            # Execute the SQL statement with parameters
-            self.db_init.execute(sql_statement, {"interestname": interestname,"code": stock_code, "name": stock_name, "ipuser": 'stock_server', "ipdate": datetime.now()})
-            # Since SQLAlchemy handles connection pooling, commit isn't usually required for each insert,
-            # but we'll ensure it's committed in case of using raw connections.
-            self.db_init.commit()
-            st.success(f"{stock_name} added to interested stocks successfully!")
-        except Exception as e:
-            st.error(f"Error when inserting stock: {e}")
-
-    def getindexprice(self,date,code,frame,termflag,term):
-        todate = int(str(date).replace('-',''))
-        if frame=='D':
-            frdate = self.getCalendar(todate,termflag,term)
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
-            params = (frdate, code, 1)
-            df = pd.read_sql(sql, con=self.db_init, params=params)
-        else:
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
-            params = (todate, code, 2)
-            df = pd.read_sql(sql, con=self.db_init,params=params)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
-            df.drop(['logdate', 'logtime'], axis=1, inplace=True)
-        return df
- 
-    def getindexprice_sugup(self,date,code,frame,termflag,term):
-               
-        todate = str(date).replace('-','')
-        if frame=='D':
-            frdate = self.getCalendar(todate,termflag,term)
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
-            params = (frdate, code, 3)
-            df = pd.read_sql(sql, con=self.db_init, params=params)
-        else:
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
-            params = (todate, code, 4)
-            df = pd.read_sql(sql, con=self.db_init, params=params)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
-            df.drop(['logdate', 'logtime','stockcode'], axis=1, inplace=True)       
-        return df
-
-    def getindex_fundmental(self,date,code):      
-        todate = str(date).replace('-','')
-        frdate = self.getCalendar(todate,termflag,term)
-        sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
-        params = (frdate, code, 5)
-        df = pd.read_sql(sql, con=self.db_init, params=params)
-        return df
-
-    def getthemename(self):
-        sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
-            '''
-        params = ('',4,'','')
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-        return df[['themecode','themename']]
-    
-
-
-    def getthemereturn(self,date,termflag,term,options):
-        todate = str(date).replace('-','')
-        frdate = self.getCalendar(todate,termflag,term)
-        sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
-        params = (frdate,todate,options ,7)
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-
-        return df
-
-
-
-    def getmaxdate(self,date,flag):
-        todate = str(date).replace('-','')
-        if flag==1: 
-            sql = '''
-                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
-                '''
-            params = (todate,5, '', '')
-            
-        elif flag==2:
-            sql = '''
-                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
-                '''
-            params = (todate,6, '', '')
-        
-        df = pd.read_sql(sql, con=self.db_init, params=params)
-        return str(df['date'][0]).replace('-','')
-    
-    def gettradinginfo(self,date,flag):
-        todate = str(date).replace('-','')
-        sql = '''
-        EXEC stock.[dbo].[SL_GetTradinginfo] ?,?
-        '''
-        params = (todate,flag)
-        df = pd.read_sql(sql, con=self.db_init, params=params)
-        return df
-
-    
-    def getAftermarketprice(self,date,options,flag):
-        todate = str(date).replace('-','')
-        sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
-        params = ('',todate,options ,4)
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-        df.columns=['시간외 표준편차','시간외 거래대금','시간외 수익률']
-        return df
-
-
-    def getthemestock(self,date,options,flag):
-        todate = int(str(date).replace('-',''))
-        sql = '''
-        EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?
-        '''
-        params = ('',todate,options,flag)
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-        percent_columns = ['changeRate', '1w', '2w', '1m', '2m', '3m', '6m', '12m', '24m']
-        for col in percent_columns:
-            df[col]=round(df[col].astype(float)*100,2)
-        columns_to_format = ['PRICECLOSE', 'foreigner', 'individual', 'institute', 'shortamt']
-        for column in columns_to_format:
-            try:
-                df[column] = df[column].map('{:,.0f}'.format)
-            except Exception:
-                continue  # 형식 변환 중 오류가 발생하면 해당 열은 변경하지 않고 계속 진행
-        # 컬럼명 변경
-        df.columns = [
-            '종목코드', '종목명', '종가', '시가총액(조)', 'PER', 'PBR', '변동률',
-            '1주', '2주', '1개월', '2개월', '3개월', '6개월', '12개월', '24개월',
-            '외국인', '개인', '기관', '공매도량']
-        return df
-
-    def getThemetermreturn(self,date,termflag,term,flag):
-        todate = str(date).replace('-','')
-        sql = '''
-        EXEC stock.[dbo].[SL_GetThemereturn] ?,?,?,?
-
-        '''
-        params = (todate,termflag,term,flag)
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-        df['termret']=round(df['termret'].astype(float)*100,2)
-        df['avgamount'] = df['avgamount'].map('{:,.0f}'.format)
-        df['avgshortamount'] = df['avgshortamount'].map('{:,.0f}'.format)
-        # 컬럼명 변경
-        df.columns = ['테마명', '수익률(%)', '평균 거래대금', '평균 공매도 거래대금']
-        return df
-
-    
-    def getTradinglist(self,date,flag):
-        todate = str(date).replace('-','')
-        sql = '''
-        EXEC stock.[dbo].[SL_GetTradinginfo] ?,?
-        '''
-        params = (todate,flag)
-        df = pd.read_sql(sql, con=self.db_init, params=params)
-        return df    
-    def create_candlestick_chart(self, df, title, x_label, y_label):
-        # x 축에 사용할 컬럼을 결정
-        if 'datetime' in df.columns:
-            x_values = df['datetime']
-            tick_format = '%H:%M'  # 시간 데이터라고 가정
-        elif 'logdate' in df.columns:
-            x_values = df['logdate']
-            tick_format = '%Y-%m-%d'  # 날짜 데이터라고 가정
-        else:
-            raise ValueError("DataFrame must have 'datetime' or 'logdate' columns")
-        
-        # 캔들스틱 차트 생성
-        fig = go.Figure(data=[go.Candlestick(
-            x=x_values,
-            open=df['open'],
-            high=df['high'],
-            low=df['low'],
-            close=df['close'],
-            increasing_line_color='red', decreasing_line_color='green'
-        )])
-        fig.update_layout(
-            title=title,
-            xaxis_title=x_label,
-            yaxis_title=y_label,
-            autosize=True,
-            xaxis=dict(
-                tickmode='auto',
-                nticks=20,
-                tickformat=tick_format
-            )
-        )
-        return fig
-    
-    def create_line_chart(self, df, title, x_label, y_label):
-        # x 축에 사용할 컬럼을 결정
-        if 'datetime' in df.columns:
-            tick_format = '%H:%M'  # 시간 데이터라고 가정
-        elif 'logdate' in df.columns:
-            tick_format = '%Y-%m-%d'  # 날짜 데이터라고 가정
-        else:
-            raise ValueError("DataFrame must have 'datetime' or 'logdate' columns")
-        
-        fig = px.line(df, x=x_label, y=y_label, title=title)
-        
-        fig.update_layout(
-            autosize=True,
-            xaxis=dict(
-                    tickmode='auto',  # 자동 또는 사용자 지정 간격으로 레이블을 조정합니다.
-                    nticks=20,  # x축에 표시할 레이블의 최대 수를 설정합니다.
-                    tickformat=tick_format  # '01-Jan' 형식의 날짜 형식을 사용합니다.
-                )
-                 )   
-    
-        return fig
-
-
-    def select_term_and_flag(self,options=('1일','1주','1개월','2개월','3개월','6개월'), default_index=5):
-        term_option = st.selectbox('기간선택', options, default_index)
-        
-        # 기간과 플래그 추출
-        if term_option.endswith('주'):
-            term = int(term_option.rstrip('주'))
-            term_flag = 'w'
-        elif term_option.endswith('개월'):
-            term = int(term_option.rstrip('개월'))
-            term_flag = 'm'
-        elif term_option.endswith('년'):
-            term = int(term_option.rstrip('년')) * 12
-            term_flag = 'm'
-        elif term_option.endswith('일'):
-            term = int(term_option.rstrip('일'))
-            term_flag = 'd'
-        else:
-            raise ValueError("Invalid term option")
-
-        return term, term_flag
 
 
 if __name__ == "__main__":
-    st.set_page_config(layout="wide", page_title="CK Market wizard")
+    st.set_page_config(layout="wide", page_title="CK Market wizard")    
     st.header('🌍 CK Market wizard')
     date = st.date_input("📅 조회 시작일을 선택해 주세요")
     # @st.cache_resource
@@ -468,7 +131,7 @@ if __name__ == "__main__":
 
             col7, col8 = st.columns(2)
             with col7:
-                df_kospi = class_data.getindex_fundmental(date,'KOSPI')
+                df_kospi = class_data.getindex_fundmental(date,'KOSPI',termflag,term)
                 df_kospi['logdate'] = pd.to_datetime(df_kospi['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_kospi, x='logdate', y='per', labels={'price': 'Price (Daily)'}, title="KOSPI PER")
                 fig_d.update_layout(autosize=True)
@@ -477,7 +140,7 @@ if __name__ == "__main__":
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
             with col8:
-                df_kosdaq = class_data.getindex_fundmental(date,'KOSDAQ')
+                df_kosdaq = class_data.getindex_fundmental(date,'KOSDAQ',termflag,term)
                 df_kosdaq['logdate'] = pd.to_datetime(df_kosdaq['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_kosdaq, x='logdate', y='per', labels={'price': 'Price (Daily)'}, title="KOSDAQ PER")
                 fig_d.update_layout(autosize=True)
@@ -542,9 +205,10 @@ if __name__ == "__main__":
             date = maxdate
         st.title('관심종목 Tracker')
         
-        interested_stock_list = class_data.getinterestedstocklist()
+        interested_stock_list = class_data.getinterestedstocklist(date)
         interestname = st.selectbox('🔎 종목 선택', interested_stock_list['interestname'])
         df_theme_stocks = class_data.getthemestock(date, interestname,3)
+        # st.dataframe(df_theme_stocks.style.applymap(lambda x: 'background-color : yellow' if x > 0 else ''), use_container_width=True)
         st.dataframe(df_theme_stocks, use_container_width=True)
 
         
@@ -605,10 +269,25 @@ if __name__ == "__main__":
                 for metric, desc in option_metrics.items():
                     fig = class_data.create_line_chart(df_option, f'Put {desc}', 'logdate', metric)
                     st.plotly_chart(fig, use_container_width=True)
-    # 사이드바 추가 기능
+    #사이드바 추가 기능
     with st.sidebar:
         st.subheader("📰 Market Insights")
         st.text_area("🆕 최신 뉴스와 업데이트", height=100)
-        # if st.checkbox("🔮 Show Predictive Analytics"):
-            # st.subheader("🔮 Predictive Analytics")
-            # st.write("예측 분석 내용이 여기에 포함됩니다.")
+        st.subheader("Contact")
+        st.write("For support, contact us via email: ")
+
+        # my_bar = st.progress(0)
+        # for percent_complete in range(100):
+        #     time.sleep(0.1)
+        #     my_bar.progress(percent_complete + 1)
+
+        
+    # with st.sidebar:
+    #     st.subheader("Navigation")
+    #     page = st.radio("Go to", ["Home", "Market Analysis", "Stock Insights", "Options", "About"])
+
+    #     st.subheader("Settings")
+    #     st.checkbox("Enable Advanced Features")
+
+    #     st.subheader("Contact")
+    #     st.write("For support, contact us via email: support@ckmarketwizard.com.")
