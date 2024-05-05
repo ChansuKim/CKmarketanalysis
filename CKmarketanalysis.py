@@ -275,9 +275,9 @@ class Dataselect():
     
     
 
-st.set_page_config(layout="wide", page_title="CK System trading")
+st.set_page_config(layout="wide", page_title="CK Market Wizard")
 
-st.header('🌍 CK System trading')
+st.header('🌍 CK Market Wizard')
 
 
 
@@ -291,7 +291,7 @@ todate = str(date).replace('-','')
 
 
 # Using object notation
-add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("시장지수","테마","주식",'관심종목','옵션'))
+add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", (" 📈시장지수","테마🎭 ","주식📊",'관심종목🌟','옵션📉'))
 
 
 if date and add_selectbox=="테마":
