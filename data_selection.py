@@ -20,8 +20,8 @@ class Dataselect():
     # @st.cache 
     def init_db(self):
         
-        
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             self.db_init = engine.connect()
@@ -30,7 +30,7 @@ class Dataselect():
             st.error(f"Failed to connect to database: {e}")
             return None
 
-
+    
     def getCalendar(self, date, termflag, term):
         todate = int(str(date).replace('-', ''))
         sql = '''
@@ -52,11 +52,16 @@ class Dataselect():
             sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
             params = ('',todate, code, int(6))
             df = pd.read_sql(sql, con=self.db_init,params=params)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
+            # df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
+            # df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
+            # cols = ['logdate', 'logtime']
+            # df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
+            # df.drop(['logdate', 'logtime'], axis=1, inplace=True)
+            df['logtime'] = df['logtime'].astype(str).str.zfill(4)
+            df['logtime'] = df['logtime'].str[:2] + ':' + df['logtime'].str[2:]
+            df['datetime'] = df['logdate'].astype(str) + ' ' + df['logtime'] + ':00'
             df.drop(['logdate', 'logtime'], axis=1, inplace=True)
+
         return df
     
     def getstockgongsi(self,date,code):
@@ -65,10 +70,9 @@ class Dataselect():
         sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
         params = ('',todate, code, int(8))
         df = pd.read_sql(sql, con=self.db_init,params=params)
-        df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-        df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-        cols = ['logdate', 'logtime']
-        df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
+        df['logtime'] = df['logtime'].astype(str).str.zfill(4)
+        df['logtime'] = df['logtime'].str[:2] + ':' + df['logtime'].str[2:]
+        df['datetime'] = df['logdate'].astype(str) + ' ' + df['logtime'] + ':00'
         df.drop(['logdate', 'logtime'], axis=1, inplace=True)
         return df
 
@@ -87,11 +91,11 @@ class Dataselect():
             EXEC stock.[dbo].[SL_GetOption] {},{},{},{},{}
             '''.format(todate,todate,'m',otm,cpflag)
             df = pd.read_sql(sql, con=self.db_init)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
+            df['logtime'] = df['logtime'].astype(str).str.zfill(4)
+            df['logtime'] = df['logtime'].str[:2] + ':' + df['logtime'].str[2:]
+            df['datetime'] = df['logdate'].astype(str) + ' ' + df['logtime'] + ':00'
             df.drop(['logdate', 'logtime'], axis=1, inplace=True)
+
             df['datetime'] =pd.to_datetime(df['datetime'])
         return df
     
@@ -119,11 +123,7 @@ class Dataselect():
         try:
             # Create a SQL statement
             sql_statement = text("INSERT INTO stock.dbo.tc_InterestedStocks (stockcode, stockname,ipuser,ipdate) VALUES (:interestname ,:code, :name,:ipuser,:ipdate)")
-            
-            # Execute the SQL statement with parameters
             self.db_init.execute(sql_statement, {"interestname": interestname,"code": stock_code, "name": stock_name, "ipuser": 'stock_server', "ipdate": datetime.now()})
-            # Since SQLAlchemy handles connection pooling, commit isn't usually required for each insert,
-            # but we'll ensure it's committed in case of using raw connections.
             self.db_init.commit()
             st.success(f"{stock_name} added to interested stocks successfully!")
         except Exception as e:
@@ -140,10 +140,9 @@ class Dataselect():
             sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
             params = (todate, code, 2)
             df = pd.read_sql(sql, con=self.db_init,params=params)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
+            df['logtime'] = df['logtime'].astype(str).str.zfill(4)
+            df['logtime'] = df['logtime'].str[:2] + ':' + df['logtime'].str[2:]
+            df['datetime'] = df['logdate'].astype(str) + ' ' + df['logtime'] + ':00'
             df.drop(['logdate', 'logtime'], axis=1, inplace=True)
         return df
  
@@ -159,10 +158,9 @@ class Dataselect():
             sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
             params = (todate, code, 4)
             df = pd.read_sql(sql, con=self.db_init, params=params)
-            df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
-            df['logtime'] =df['logtime'].apply(lambda x: str(x)[:2]+':'+str(x)[-2:])
-            cols = ['logdate', 'logtime']
-            df['datetime'] =df[cols].apply(lambda row: ' '.join(row.values.astype(str))+':00', axis=1)
+            df['logtime'] = df['logtime'].astype(str).str.zfill(4)
+            df['logtime'] = df['logtime'].str[:2] + ':' + df['logtime'].str[2:]
+            df['datetime'] = df['logdate'].astype(str) + ' ' + df['logtime'] + ':00'
             df.drop(['logdate', 'logtime','stockcode'], axis=1, inplace=True)       
         return df
 

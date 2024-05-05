@@ -2,6 +2,7 @@ import streamlit as st
 from data_selection import Dataselect  # Assuming you have a separate module for data handling
 import pandas as pd
 import plotly.express as px
+from datetime import datetime
 
 
 def generate_table(dataframe):
@@ -13,27 +14,27 @@ def generate_table(dataframe):
             for col, value in row.items()]) + "</tr>")
     return "<table>" + header + "".join(rows) + "</table>"
 
+def get_maxdate(todate):
+    maxdate = class_data.getmaxdate(todate,1)
+    if int(todate)>=int(maxdate):
+        date = maxdate
+    return date
+
 if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market wizard")    
     st.header('🌍 CK Market wizard')
-    date = st.date_input("📅 조회 시작일을 선택해 주세요")
+    
+    date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
     # @st.cache_resource
     class_data = Dataselect(date,st.secrets["server"],st.secrets["database"],st.secrets["username"],st.secrets["password"])
     db_connection = class_data.init_db()
     todate = str(date).replace('-','')
-
-
+    date = get_maxdate(todate)
     # Using object notation
     add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("📈시장지수","🎭테마수익률","📊주식분석",'🔖관심종목','💹옵션분석'))
     if date and add_selectbox=="🎭테마수익률":
-        
-        maxdate = class_data.getmaxdate(todate,1)
-
-        if int(todate)>=int(maxdate):
-            date = maxdate
-
         st.subheader('📈테마수익률 현황')
-
+        st.write('조회일 : ',date)
         term, termflag = class_data.select_term_and_flag()
         tab1,tab2 = st.tabs(['종합현황','테마수익률'])
 
@@ -85,9 +86,7 @@ if __name__ == "__main__":
 
 
     if date and add_selectbox=="📈시장지수":
-        maxdate = class_data.getmaxdate(todate,1)
-        if int(todate)>=int(maxdate):
-            date = maxdate
+        st.write('조회일 : ',date)
         st.subheader('📈 시장지수 분석')
 
         tab1,tab2 = st.tabs(['Intraday','Daily'])
@@ -175,10 +174,7 @@ if __name__ == "__main__":
                 st.plotly_chart(fig_d, use_container_width=True)
 
     if date and add_selectbox=="📊주식분석":
-        maxdate = class_data.getmaxdate(todate,1)
-
-        if int(todate)>=int(maxdate):
-            date = maxdate
+        st.write('조회일 : ',date)
         stock_list = class_data.getstockmater(date)
         stock_options = {f"{row['stockcode']} - {row['stockname']}": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
         stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys()))  
@@ -216,10 +212,7 @@ if __name__ == "__main__":
         st.markdown(html_table, unsafe_allow_html=True)
 
     if date and add_selectbox=="🔖관심종목":
-        maxdate = class_data.getmaxdate(todate,1)
-
-        if int(todate)>=int(maxdate):
-            date = maxdate
+        st.write('조회일 : ',date)
         st.title('관심종목 Tracker')
         
         interested_stock_list = class_data.getinterestedstocklist(date)
@@ -230,12 +223,7 @@ if __name__ == "__main__":
 
         
     if date and add_selectbox=="💹옵션분석":
-        
-        maxdate = class_data.getmaxdate(todate,1)
-
-        if int(todate)>=int(maxdate):
-            date = maxdate
-
+        st.write('조회일 : ',date)
         st.subheader('📈옵션 현황')
                     
         option_metrics = {
