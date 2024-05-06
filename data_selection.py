@@ -19,7 +19,9 @@ class Dataselect():
         
     # @st.cache 
     def init_db(self):
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        
+        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             self.db_init = engine.connect()
@@ -32,9 +34,9 @@ class Dataselect():
     def getCalendar(self, date, termflag, term):
         todate = int(str(date).replace('-', ''))
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
+            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
             '''
-        params = (todate,2, termflag, term)
+        params = (todate,2, termflag, term,'')
         df = pd.read_sql(sql, con=self.db_init, params=params)
         frdate = int(df['frdate'][0])
         return frdate 
@@ -100,17 +102,17 @@ class Dataselect():
     def getstockmater(self,date):
         todate = int(str(date).replace('-',''))
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
+            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
             '''
-        params = (todate,1,'','')
+        params = (todate,1,'','','')
         df = pd.read_sql(sql, con=self.db_init,params=params)
         return df[['stockcode','stockname']]
     
     def getinterestedstocklist(self,todate):
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
+            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
             '''
-        params = (todate,3,'','')
+        params = (todate,3,'','','')
         df = pd.read_sql(sql, con=self.db_init,params=params)
         return df
     
@@ -172,13 +174,21 @@ class Dataselect():
 
     def getthemename(self):
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
+            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
             '''
-        params = ('',4,'','')
+        params = ('',4,'','','')
         df = pd.read_sql(sql, con=self.db_init,params=params)
         return df[['themecode','themename']]
     
-
+    def getCurrentPrice(self,date,flag,code):
+        sql = '''
+            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            '''
+        params = (date,flag,'','',code)
+        df = pd.read_sql(sql, con=self.db_init,params=params)
+        price = round(df['close'].iloc[-1],2)
+        delta = round(df['change'].iloc[-1],2)
+        return price,delta
 
     def getthemereturn(self,date,termflag,term,options):
         todate = str(date).replace('-','')
@@ -195,15 +205,15 @@ class Dataselect():
         todate = str(date).replace('-','')
         if flag==1: 
             sql = '''
-                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
+                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
                 '''
-            params = (todate,5, '', '')
+            params = (todate,5, '', '','')
             
         elif flag==2:
             sql = '''
-                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?
+                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
                 '''
-            params = (todate,6, '', '')
+            params = (todate,6, '', '','')
         
         df = pd.read_sql(sql, con=self.db_init, params=params)
         return str(df['date'][0]).replace('-','')

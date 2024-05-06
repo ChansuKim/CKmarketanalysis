@@ -37,8 +37,37 @@ if __name__ == "__main__":
     if date and add_selectbox=="🌟메인":
         st.subheader('🌟메인')
         st.write('조회일 : ',date)
+        
+        with st.container():
+            col11, col12, col13, col14 = st.columns(4)
+            with col11:
+                price,delta = class_data.getCurrentPrice(date,7,'U001')
+                st.metric(label="KOSPI", value=price, delta=delta)
+            with col12:
+                price,delta = class_data.getCurrentPrice(date,7,'U201')
+                st.metric(label="KOSDAQ", value=price, delta=delta)
+            with col13:
+                price,delta = class_data.getCurrentPrice(date,8,'SPX')
+                st.metric(label="NASDAQ", value=price, delta=delta)
+            with col14:
+                price,delta = class_data.getCurrentPrice(date,8,'COMP')
+                st.metric(label="NASDAQ", value=price, delta=delta)
+            col15, col16, col17, col18 = st.columns(4)
+            with col15:
+                price,delta = class_data.getCurrentPrice(date,9,'FX@KRW')
+                st.metric(label="한국 원", value=price, delta=delta)
+            with col16:
+                price,delta = class_data.getCurrentPrice(date,9,'CM@NGLD')
+                st.metric(label="CM@NGLD", value=price, delta=delta)
+            with col17:
+                price,delta = class_data.getCurrentPrice(date,9,'99948')
+                st.metric(label="미국채권,10-Year(CBT)", value=price, delta=delta)
+            with col18:
+                price,delta = class_data.getCurrentPrice(date,9,'CM@PWTI')
+                st.metric(label="WTI, 원유 뉴욕근월", value=price, delta=delta)
 
 
+        st.write('')
         col1, col2 = st.columns(2)
         with st.container():      
             with col1:
