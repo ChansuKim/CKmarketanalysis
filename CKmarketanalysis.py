@@ -62,7 +62,6 @@ if __name__ == "__main__":
                 with cols[idx % len(cols)]:
                     st.metric(label=label, value=price, delta=delta)
                 idx += 1
-
         st.divider()
         col1, col2 = st.columns(2)
         with st.container():      
