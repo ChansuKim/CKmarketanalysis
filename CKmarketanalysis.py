@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
 
     if date and add_selectbox=="🌟대시보드":
-        st.subheader('🌟Dash Board')
+        st.subheader('🌟DASH BOARD')
         st.write('조회일 : ',date)
         
         with st.container():
@@ -73,7 +73,7 @@ if __name__ == "__main__":
             with col1:
                 st.markdown('**시장지수**')
                 df = class_data.marketcondition(date,2)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df, use_container_width=True)
             with col2:
                 st.markdown('**상품**')
                 df = class_data.marketcondition(date,3)
@@ -182,37 +182,10 @@ if __name__ == "__main__":
         st.write('조회일 : ',date)
         st.subheader('📈 시장지수 분석')
 
-        tab1,tab2 = st.tabs(['Intraday','Daily'])
+        tab1,tab2 = st.tabs(['Daily','Intraday'])
         # Display dataframe with better visibility
-        with tab1:
-            col1, col2 = st.columns(2)
-            with col1:
-                df_price = class_data.getindexprice(date, 'U001', 'M',None,None)
-                df_price['datetime'] =pd.to_datetime(df_price['datetime'])
-                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday KOSPI Candestick Chart', 'date', 'price')
-                st.plotly_chart(fig_m, use_container_width=True)
-            with col2:
-                df_price = class_data.getindexprice(date, 'U201', 'M',None,None)
-                df_price['datetime'] =pd.to_datetime(df_price['datetime'])
-                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday KOSDAQ Candestick Chart', 'date', 'price')
-                st.plotly_chart(fig_m, use_container_width=True)
-            col3, col4 = st.columns(2)
-            with col3:
-                df_price = class_data.getindexprice_sugup(date, 'u001','M',None,None)
-                
-                df_price['datetime'] = pd.to_datetime(df_price['datetime'])  # Ensure datetime is in the correct format
-                fig_d = px.line(df_price, x='datetime', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Intraday KOSPI_sugup Trends")
-                fig_d.update_layout(autosize=True)
-                st.plotly_chart(fig_d, use_container_width=True)
-            with col4:
-                df_price = class_data.getindexprice_sugup(date, 'u201','M',None,None)
-                
-                df_price['datetime'] = pd.to_datetime(df_price['datetime'])  # Ensure datetime is in the correct format
-                fig_d = px.line(df_price, x='datetime', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Intraday KOSDAQ_sugup Trends")
-                fig_d.update_layout(autosize=True)
-                st.plotly_chart(fig_d, use_container_width=True)
 
-        with tab2:
+        with tab1:
             term, termflag = class_data.select_term_and_flag()
             
             col5, col6 = st.columns(2)
@@ -250,8 +223,6 @@ if __name__ == "__main__":
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True) 
 
-
-
             col11,col12 = st.columns(2)
             with col11:
                 df_price = class_data.getindexprice_sugup(date, 'u001','D',termflag,term)
@@ -263,6 +234,34 @@ if __name__ == "__main__":
                 df_price = class_data.getindexprice_sugup(date, 'u201','D',termflag,term)
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSDAQ_sugup Trends")
+                fig_d.update_layout(autosize=True)
+                st.plotly_chart(fig_d, use_container_width=True)
+
+        with tab2:
+            col1, col2 = st.columns(2)
+            with col1:
+                df_price = class_data.getindexprice(date, 'U001', 'M',None,None)
+                df_price['datetime'] =pd.to_datetime(df_price['datetime'])
+                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday KOSPI Candestick Chart', 'date', 'price')
+                st.plotly_chart(fig_m, use_container_width=True)
+            with col2:
+                df_price = class_data.getindexprice(date, 'U201', 'M',None,None)
+                df_price['datetime'] =pd.to_datetime(df_price['datetime'])
+                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday KOSDAQ Candestick Chart', 'date', 'price')
+                st.plotly_chart(fig_m, use_container_width=True)
+            col3, col4 = st.columns(2)
+            with col3:
+                df_price = class_data.getindexprice_sugup(date, 'u001','M',None,None)
+                
+                df_price['datetime'] = pd.to_datetime(df_price['datetime'])  # Ensure datetime is in the correct format
+                fig_d = px.line(df_price, x='datetime', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Intraday KOSPI_sugup Trends")
+                fig_d.update_layout(autosize=True)
+                st.plotly_chart(fig_d, use_container_width=True)
+            with col4:
+                df_price = class_data.getindexprice_sugup(date, 'u201','M',None,None)
+                
+                df_price['datetime'] = pd.to_datetime(df_price['datetime'])  # Ensure datetime is in the correct format
+                fig_d = px.line(df_price, x='datetime', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Intraday KOSDAQ_sugup Trends")
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
 
@@ -329,29 +328,10 @@ if __name__ == "__main__":
             'vega': 'Vega'
         }
 
-        tab1,tab2 = st.tabs(['Intraday','Daily'])
+        tab1,tab2 = st.tabs(['Daily','Intraday'])
+
         with tab1:
-            col1,col2 = st.columns(2)
-
-
-            with col1:
-                df_option = class_data.getoptionprice(date,'m',0,'c',None,None)
-                # Generate and display charts for Call options
-                for metric, desc in option_metrics.items():
-                    fig = class_data.create_line_chart(df_option, f'Call {desc}', 'datetime', metric)
-                    st.plotly_chart(fig, use_container_width=True)
-
-
-            with col2:
-                df_option = class_data.getoptionprice(date,'m',0,'p',None,None)
-                # Generate and display charts for Call options
-                for metric, desc in option_metrics.items():
-                    fig = class_data.create_line_chart(df_option, f'Put {desc}', 'datetime', metric)
-                    st.plotly_chart(fig, use_container_width=True)
-
-
-        with tab2:
-            term, termflag = class_data.select_term_and_flag()
+            term, termflag = class_data.select_term_and_flag(default_index=2)
 
             col3,col4 = st.columns(2)
             with col3:
@@ -367,6 +347,24 @@ if __name__ == "__main__":
                 for metric, desc in option_metrics.items():
                     fig = class_data.create_line_chart(df_option, f'Put {desc}', 'logdate', metric)
                     st.plotly_chart(fig, use_container_width=True)
+
+        with tab2:
+            col1,col2 = st.columns(2)
+            with col1:
+                df_option = class_data.getoptionprice(date,'m',0,'c',None,None)
+                # Generate and display charts for Call options
+                for metric, desc in option_metrics.items():
+                    fig = class_data.create_line_chart(df_option, f'Call {desc}', 'datetime', metric)
+                    st.plotly_chart(fig, use_container_width=True)
+
+
+            with col2:
+                df_option = class_data.getoptionprice(date,'m',0,'p',None,None)
+                # Generate and display charts for Call options
+                for metric, desc in option_metrics.items():
+                    fig = class_data.create_line_chart(df_option, f'Put {desc}', 'datetime', metric)
+                    st.plotly_chart(fig, use_container_width=True)
+
     #사이드바 추가 기능
     with st.sidebar:
         st.subheader("📰 Market Insights")
