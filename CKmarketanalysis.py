@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 st.metric(label="KOSDAQ", value=price, delta=delta)
             with col13:
                 price,delta = class_data.getCurrentPrice(date,8,'SPX')
-                st.metric(label="NASDAQ", value=price, delta=delta)
+                st.metric(label="S&P500", value=price, delta=delta)
             with col14:
                 price,delta = class_data.getCurrentPrice(date,8,'COMP')
                 st.metric(label="NASDAQ", value=price, delta=delta)
