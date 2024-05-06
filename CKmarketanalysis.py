@@ -73,56 +73,56 @@ if __name__ == "__main__":
             with col1:
                 st.markdown('**시장지수**')
                 df = class_data.marketcondition(date,2)
-                st.dataframe(df, use_container_width=True)
+                st.dataframe(df, use_container_width=True,hide_index=True)
             with col2:
                 st.markdown('**상품**')
                 df = class_data.marketcondition(date,3)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
         col3, col4 = st.columns(2)
         with st.container():      
             with col3:
                 st.markdown('**환율**')
                 df = class_data.marketcondition(date,4)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
             with col4:
                 st.markdown('**채권**')
                 df = class_data.marketcondition(date,5)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
         col5, col6 = st.columns(2)
         with st.container():      
             with col5:
                 st.markdown('**코스피 주간 Top 10**')
                 df = class_data.marketcondition(date,6)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
 
             with col6:
                 st.markdown('**코스닥 주간 top 10**')
                 df = class_data.marketcondition(date,7)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
 
         col7, col8 = st.columns(2)
         with st.container():      
             with col5:
                 st.markdown('**코넥스 주간 Top 10**')
                 df = class_data.marketcondition(date,9)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
 
             with col6:
                 st.markdown('**K-OTC 주간 Top 10**')
                 df = class_data.marketcondition(date,10)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
 
         col9, col10 = st.columns(2)
         with st.container():      
             with col9:
                 st.markdown('**ETF 주간 Top 10**')
                 df = class_data.marketcondition(date,8)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
 
             with col10:
                 st.markdown('**ETF 주간 Bottom 10**')
                 df = class_data.marketcondition(date,13)
-                st.dataframe(df , use_container_width=True)
+                st.dataframe(df , use_container_width=True,hide_index=True)
 
 
     if date and add_selectbox=="🎭테마수익률":
@@ -137,31 +137,31 @@ if __name__ == "__main__":
                 with col1:
                     st.markdown('**🔝 테마수익률 상위 5**')
                     df_top_returns  = class_data.getThemetermreturn(date,termflag,term,'1')
-                    st.dataframe(df_top_returns , use_container_width=True)
+                    st.dataframe(df_top_returns , use_container_width=True,hide_index=True)
                 with col2:
                     st.markdown('**🔻 테마수익률 하위 5**')
                     df_bottom_returns  = class_data.getThemetermreturn(date,termflag,term,'2')
-                    st.dataframe(df_bottom_returns, use_container_width=True)
+                    st.dataframe(df_bottom_returns, use_container_width=True,hide_index=True)
             col3, col4 = st.columns(2)
             with st.container():      
                 with col3:
                     st.markdown('**🔝 테마거래량 상위 5**')
                     df_top_vol  = class_data.getThemetermreturn(date,termflag,term,'3')
-                    st.dataframe(df_top_vol , use_container_width=True)
+                    st.dataframe(df_top_vol , use_container_width=True,hide_index=True)
                 with col4:
                     st.markdown('**🔻 테마거래량 하위 5**')
                     df_bottom_vol  = class_data.getThemetermreturn(date,termflag,term,'4')
-                    st.dataframe(df_bottom_vol, use_container_width=True)
+                    st.dataframe(df_bottom_vol, use_container_width=True,hide_index=True)
             col5, col6 = st.columns(2)
             with st.container():      
                 with col5:
                     st.markdown('**🔝 테마공매도 상위 5**')
                     df_top_short  = class_data.getThemetermreturn(date,termflag,term,'5')
-                    st.dataframe(df_top_short , use_container_width=True)
+                    st.dataframe(df_top_short , use_container_width=True,hide_index=True)
                 with col6:
                     st.markdown('**🔻 테마공매도 하위 5**')
                     df_bottom_short  = class_data.getThemetermreturn(date,termflag,term,'6')
-                    st.dataframe(df_bottom_short, use_container_width=True) 
+                    st.dataframe(df_bottom_short, use_container_width=True,hide_index=True) 
         with tab2:
             theme_names = class_data.getthemename()
             theme_options = {f"{row['themecode']} - {row['themename']}": (row['themecode'], row['themename']) for index, row in theme_names.iterrows()}
@@ -174,7 +174,7 @@ if __name__ == "__main__":
                 df_theme_return.set_index('logdate', inplace=True)
                 st.line_chart(df_theme_return)
                 df_theme_stocks = class_data.getthemestock(date, selected_themecode,1)
-                st.dataframe(df_theme_stocks, use_container_width=True)
+                st.dataframe(df_theme_stocks, use_container_width=True,hide_index=True)
 
 
 
@@ -276,8 +276,8 @@ if __name__ == "__main__":
         df_aftermarket = class_data.getAftermarketprice(date, selected_stock, 4)
 
         df_gongsi = class_data.getstockgongsi(date, selected_stock)
-        st.dataframe(df, use_container_width=True)
-        st.dataframe(df_aftermarket)
+        st.dataframe(df, use_container_width=True,hide_index=True)
+        st.dataframe(df_aftermarket,hide_index=True)
 
         col7, col8 = st.columns(2)
         
@@ -311,7 +311,7 @@ if __name__ == "__main__":
         interestname = st.selectbox('🔎 종목 선택', interested_stock_list['interestname'])
         df_theme_stocks = class_data.getthemestock(date, interestname,3)
         # st.dataframe(df_theme_stocks.style.applymap(lambda x: 'background-color : yellow' if x > 0 else ''), use_container_width=True)
-        st.dataframe(df_theme_stocks, use_container_width=True)
+        st.dataframe(df_theme_stocks, use_container_width=True,hide_index=True)
 
         
     if date and add_selectbox=="💹옵션분석":
