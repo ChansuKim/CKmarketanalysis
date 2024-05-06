@@ -31,11 +31,11 @@ if __name__ == "__main__":
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
     # Using object notation
-    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟메인","📈시장지수","🎭테마수익률","📊주식분석",'🔖관심종목','💹옵션분석'))
+    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'🔖관심종목','💹옵션분석'))
 
 
-    if date and add_selectbox=="🌟메인":
-        st.subheader('🌟메인')
+    if date and add_selectbox=="🌟대시보드":
+        st.subheader('🌟Dash Board')
         st.write('조회일 : ',date)
         
         with st.container():
