@@ -261,7 +261,6 @@ if __name__ == "__main__":
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
 
-    
     if date and add_selectbox=="📊주식분석":
         st.write('조회일 : ',date)
         with st.expander("See explanation"):
@@ -279,44 +278,51 @@ if __name__ == "__main__":
             condition_options = {f"{row['name']}": (row['seq'], row['name']) for index, row in stock_conditions.iterrows()}
             condition_choice = st.selectbox("🔎조건 선택",list(condition_options.keys()))
         with col2:
-            stock_list = class_data.getstocklistbycondition(date,condition_choice)
-            stock_options = {f"{row['stockcode']} - {row['stockname']}({round(row['ret']*100,2)}%)": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
-            stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys()))  
-     
-        if condition_choice =='갭상승':
-            date = class_data.getCalendar(date,'D',1) #전일패턴을 알고싶다면..
-        
-        selected_stock, stockname = stock_options[stock_choice]
-        df = class_data.getthemestock(date, selected_stock, 2)
-        df_aftermarket = class_data.getAftermarketprice(date, selected_stock, 4)
 
-        df_gongsi = class_data.getstockgongsi(date, selected_stock)
-        st.dataframe(df, use_container_width=True,hide_index=True)
-        st.dataframe(df_aftermarket,hide_index=True)
+                stock_list = class_data.getstocklistbycondition(date,condition_choice)
+                stock_options = {f"{row['stockcode']} - {row['stockname']}({round(row['ret']*100,2)}%)": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
+                stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys())) 
+ 
 
-        col7, col8 = st.columns(2)
-        
-        with col7:
-            df_price = class_data.getstockprice(date, selected_stock, 'M')
+        try:            
+            searchdate=date
+            if condition_choice =='갭상승':
+                searchdate = class_data.getCalendar(date,'D',1) #전일패턴을 알고싶다면..
+
+            # st.write('조회일 : ',date,'/',condition_choice,'발생일자',searchdate)
+            selected_stock, stockname = stock_options[stock_choice]
+            df = class_data.getthemestock(searchdate, selected_stock, 2)
+            df_aftermarket = class_data.getAftermarketprice(searchdate, selected_stock, 4)
+
+            df_gongsi = class_data.getstockgongsi(date, selected_stock)
+            st.dataframe(df, use_container_width=True,hide_index=True)
+            st.dataframe(df_aftermarket,hide_index=True)
+
+            col7, col8 = st.columns(2)
             
-            df_price['datetime'] =pd.to_datetime(df_price['datetime'])
-            fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart('+str(date)+')', 'date', 'price')
-            st.plotly_chart(fig_m, use_container_width=True)
-        
-        with col8:
-            df_price = class_data.getstockprice(date, selected_stock, 'D')
-            df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
-            fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title='Daily Price Trends(From a month ago to '+str(date)+')')
-            fig_d.update_layout(autosize=True)
-            st.plotly_chart(fig_d, use_container_width=True)
+            with col7:
+                df_price = class_data.getstockprice(searchdate, selected_stock, 'M')
+                
+                df_price['datetime'] =pd.to_datetime(df_price['datetime'])
+                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart('+str(searchdate)+')', 'date', 'price')
+                st.plotly_chart(fig_m, use_container_width=True)
+            
+            with col8:
+                df_price = class_data.getstockprice(searchdate, selected_stock, 'D')
+                df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
+                fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title='Daily Price Trends(From a month ago to '+str(searchdate)+')')
+                fig_d.update_layout(autosize=True)
+                st.plotly_chart(fig_d, use_container_width=True)
 
-        # st.dataframe(df_gongsi)
+            # st.dataframe(df_gongsi)
 
-        st.markdown("""
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-        """, unsafe_allow_html=True)
-        html_table = generate_table(df_gongsi)
-        st.markdown(html_table, unsafe_allow_html=True)
+            st.markdown("""
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+            """, unsafe_allow_html=True)
+            html_table = generate_table(df_gongsi)
+            st.markdown(html_table, unsafe_allow_html=True)
+        except Exception as e:
+            st.write('해당되는 종목이 없습니다.')
 
     if date and add_selectbox=="🔖관심종목":
         st.write('조회일 : ',date)
