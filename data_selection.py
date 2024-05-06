@@ -20,8 +20,8 @@ class Dataselect():
     # @st.cache 
     def init_db(self):
         
-        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             self.db_init = engine.connect()
@@ -370,6 +370,18 @@ class Dataselect():
             df[col]=round(df[col].astype(float)*100,2)
         return df
 
-
-
-
+    def getconditionlist(self):
+        sql = '''
+            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            '''
+        params = ('',10, '', '','')
+        df = pd.read_sql(sql, con=self.db_init, params=params)
+        return df
+    
+    def getstocklistbycondition(self,date,condition):
+        sql = '''
+            EXEC stock.[dbo].[SL_GetStocklistbyCondition] ?,?
+            '''
+        params = (date,condition)
+        df = pd.read_sql(sql, con=self.db_init, params=params)
+        return df

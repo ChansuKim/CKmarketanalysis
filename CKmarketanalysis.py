@@ -62,6 +62,7 @@ if __name__ == "__main__":
                 with cols[idx % len(cols)]:
                     st.metric(label=label, value=price, delta=delta)
                 idx += 1
+
         st.divider()
         col1, col2 = st.columns(2)
         with st.container():      
@@ -262,10 +263,28 @@ if __name__ == "__main__":
 
     if date and add_selectbox=="📊주식분석":
         st.write('조회일 : ',date)
-        stock_list = class_data.getstockmater(date)
-        stock_options = {f"{row['stockcode']} - {row['stockname']}": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
-        stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys()))  
-
+        with st.expander("See explanation"):
+            st.write('''
+                1. 갭상승 - X:전일 추이 Y:당일 갭상승
+                2. 시간외 - X:당일 추이 Y:당일 시간외
+                3. 투자유의 - X:전일 투자유의 Y: 당일 일별수익
+                4. 투자경고 - X:전일 투자유의 Y: 당일 일별수익
+                5. 투자경고예고 - X:전일 투자유의 Y: 당일 일별수익
+                6. 단기과열 - X:전일 투자유의 Y: 당일 일별수익          
+            ''')
+        col1,col2= st.columns(2)
+        with col1:
+            stock_conditions = class_data.getconditionlist()
+            condition_options = {f"{row['name']}": (row['seq'], row['name']) for index, row in stock_conditions.iterrows()}
+            condition_choice = st.selectbox("🔎조건 선택",list(condition_options.keys()))
+        with col2:
+            stock_list = class_data.getstocklistbycondition(date,condition_choice)
+            stock_options = {f"{row['stockcode']} - {row['stockname']}({round(row['ret']*100,2)}%)": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
+            stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys()))  
+     
+        if condition_choice =='갭상승':
+            date = class_data.getCalendar(date,'D',1) #전일패턴을 알고싶다면..
+        
         selected_stock, stockname = stock_options[stock_choice]
         df = class_data.getthemestock(date, selected_stock, 2)
         df_aftermarket = class_data.getAftermarketprice(date, selected_stock, 4)
@@ -280,13 +299,13 @@ if __name__ == "__main__":
             df_price = class_data.getstockprice(date, selected_stock, 'M')
             
             df_price['datetime'] =pd.to_datetime(df_price['datetime'])
-            fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart', 'date', 'price')
+            fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart('+str(date)+')', 'date', 'price')
             st.plotly_chart(fig_m, use_container_width=True)
         
         with col8:
             df_price = class_data.getstockprice(date, selected_stock, 'D')
             df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
-            fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title="Daily Price Trends")
+            fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title='Daily Price Trends(From a month ago to '+str(date)+')')
             fig_d.update_layout(autosize=True)
             st.plotly_chart(fig_d, use_container_width=True)
 
