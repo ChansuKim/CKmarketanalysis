@@ -20,6 +20,17 @@ def get_maxdate(todate):
         date = maxdate
     return date
 
+# def responsive_columns():
+#     # 화면 너비에 따라 열의 개수를 결정
+#     if st.session_state.get('width', 0) < 640:
+#         # 모바일 환경
+#         cols = st.columns(2)
+#     else:
+#         # 데스크탑 환경
+#         cols = st.columns(4)
+#     return cols
+
+
 if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market wizard")    
     st.header('🌍 CK Market wizard')
@@ -37,37 +48,22 @@ if __name__ == "__main__":
     if date and add_selectbox=="🌟대시보드":
         st.subheader('🌟DASH BOARD')
         st.write('조회일 : ',date)
-        
+        st.divider()
         with st.container():
-            col11, col12, col13, col14 = st.columns(4)
-            with col11:
-                price,delta = class_data.getCurrentPrice(date,7,'U001')
-                st.metric(label="KOSPI", value=price, delta=delta)
-            with col12:
-                price,delta = class_data.getCurrentPrice(date,7,'U201')
-                st.metric(label="KOSDAQ", value=price, delta=delta)
-            with col13:
-                price,delta = class_data.getCurrentPrice(date,8,'SPX')
-                st.metric(label="S&P500", value=price, delta=delta)
-            with col14:
-                price,delta = class_data.getCurrentPrice(date,8,'COMP')
-                st.metric(label="NASDAQ", value=price, delta=delta)
-            col15, col16, col17, col18 = st.columns(4)
-            with col15:
-                price,delta = class_data.getCurrentPrice(date,9,'FX@KRW')
-                st.metric(label="한국 원", value=price, delta=delta)
-            with col16:
-                price,delta = class_data.getCurrentPrice(date,9,'CM@NGLD')
-                st.metric(label="금($/온스)", value=price, delta=delta)
-            with col17:
-                price,delta = class_data.getCurrentPrice(date,9,'99948')
-                st.metric(label="미국채권,10-Year(CBT)", value=price, delta=delta)
-            with col18:
-                price,delta = class_data.getCurrentPrice(date,9,'CM@PWTI')
-                st.metric(label="WTI, 원유 뉴욕근월", value=price, delta=delta)
+            # cols = responsive_columns()
+            cols = st.columns(8)
+            idx = 0
+            markets = [
+                ('KOSPI',7, 'U001'), ('KOSDAQ',7, 'U201'), ('S&P500',8, 'SPX'), ('NASDAQ',8, 'COMP'),
+                ('한국 원', 9,'FX@KRW'), ('금($/온스)', 9,'CM@NGLD'), ('미국채권,9,10-Year(CBT)',9, '99948'), ('WTI, 원유 뉴욕근월', 9,'CM@PWTI')
+            ]
+            for label,flag, code in markets:
+                price, delta = class_data.getCurrentPrice(date, flag, code)
+                with cols[idx % len(cols)]:
+                    st.metric(label=label, value=price, delta=delta)
+                idx += 1
 
-
-        st.write('')
+        st.divider()
         col1, col2 = st.columns(2)
         with st.container():      
             with col1:
@@ -305,7 +301,7 @@ if __name__ == "__main__":
 
     if date and add_selectbox=="🔖관심종목":
         st.write('조회일 : ',date)
-        st.title('관심종목 Tracker')
+        st.subheader('관심종목 Tracker')
         
         interested_stock_list = class_data.getinterestedstocklist(date)
         interestname = st.selectbox('🔎 종목 선택', interested_stock_list['interestname'])
@@ -370,7 +366,7 @@ if __name__ == "__main__":
         st.subheader("📰 Market Insights")
         st.text_area("🆕 최신 뉴스와 업데이트", height=100)
         st.subheader("Contact")
-        st.write("For support, contact us via email: ")
+        st.write("For support, contact me via email: chansoookim@naver.com ")
 
         # my_bar = st.progress(0)
         # for percent_complete in range(100):
