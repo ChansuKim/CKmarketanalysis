@@ -58,7 +58,7 @@ if __name__ == "__main__":
                 st.metric(label="한국 원", value=price, delta=delta)
             with col16:
                 price,delta = class_data.getCurrentPrice(date,9,'CM@NGLD')
-                st.metric(label="CM@NGLD", value=price, delta=delta)
+                st.metric(label="금($/온스)", value=price, delta=delta)
             with col17:
                 price,delta = class_data.getCurrentPrice(date,9,'99948')
                 st.metric(label="미국채권,10-Year(CBT)", value=price, delta=delta)
