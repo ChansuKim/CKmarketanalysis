@@ -261,6 +261,7 @@ if __name__ == "__main__":
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
 
+    
     if date and add_selectbox=="📊주식분석":
         st.write('조회일 : ',date)
         with st.expander("See explanation"):
