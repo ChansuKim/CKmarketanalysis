@@ -15,9 +15,12 @@ def generate_table(dataframe):
     return "<table>" + header + "".join(rows) + "</table>"
 
 def get_maxdate(todate):
+
     maxdate = class_data.getmaxdate(todate,1)
     if int(todate)>=int(maxdate):
         date = maxdate
+
+
     return date
 
 # def responsive_columns():
@@ -43,11 +46,13 @@ if __name__ == "__main__":
     date = get_maxdate(todate)
     # Using object notation
     add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'🔖관심종목','💹옵션분석'))
+    if st.session_state==None:
+        st.session_state=date
 
-
+    
     if date and add_selectbox=="🌟대시보드":
         st.subheader('🌟DASH BOARD')
-        st.write('조회일 : ',date)
+        st.write('조건 조회일 : ',date)
         st.divider()
         with st.container():
             # cols = responsive_columns()
@@ -177,7 +182,6 @@ if __name__ == "__main__":
     if date and add_selectbox=="📈시장지수":
         st.write('조회일 : ',date)
         st.subheader('📈 시장지수 분석')
-
         tab1,tab2 = st.tabs(['Daily','Intraday'])
         # Display dataframe with better visibility
 
@@ -262,34 +266,27 @@ if __name__ == "__main__":
                 st.plotly_chart(fig_d, use_container_width=True)
 
     if date and add_selectbox=="📊주식분석":
-        st.write('조회일 : ',date)
-        with st.expander("See explanation"):
-            st.write('''
-                1. 갭상승 - 당일 갭상승, 차트 전일
-                2. 시간외 - 당일 시간외, 차트 당일
-                3. 투자유의 - 전일 투자유의,  차트 당일
-                4. 투자경고 - 전일 투자유의, 차트 당일
-                5. 투자경고예고 - 전일 투자유의, 차트 당일
-                6. 단기과열 - 전일 투자유의, 차트 당일             
-            ''')
+        # st.session_state=None
+        # with st.expander("See explanation"):
+        #     st.write('''
+                    
+        #     ''')
+        st.write("조회일 ",date)
         col1,col2= st.columns(2)
         with col1:
             stock_conditions = class_data.getconditionlist()
             condition_options = {f"{row['name']}": (row['seq'], row['name']) for index, row in stock_conditions.iterrows()}
+            
             condition_choice = st.selectbox("🔎조건 선택",list(condition_options.keys()))
         with col2:
-
-                stock_list = class_data.getstocklistbycondition(date,condition_choice)
-                stock_options = {f"{row['stockcode']} - {row['stockname']}({round(row['ret']*100,2)}%)": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
-                stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys())) 
+            stock_list = class_data.getstocklistbycondition(date,condition_choice)
+            stock_options = {f"{row['stockcode']} - {row['stockname']}({round(row['ret']*100,2)}%)": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
+            stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys())) 
  
 
         try:            
-            searchdate=date
-            if condition_choice =='갭상승':
-                searchdate = class_data.getCalendar(date,'D',1) #전일패턴을 알고싶다면..
 
-            # st.write('조회일 : ',date,'/',condition_choice,'발생일자',searchdate)
+            searchdate=date
             selected_stock, stockname = stock_options[stock_choice]
             df = class_data.getthemestock(searchdate, selected_stock, 2)
             df_aftermarket = class_data.getAftermarketprice(searchdate, selected_stock, 4)
@@ -297,20 +294,31 @@ if __name__ == "__main__":
             df_gongsi = class_data.getstockgongsi(date, selected_stock)
             st.dataframe(df, use_container_width=True,hide_index=True)
             st.dataframe(df_aftermarket,hide_index=True)
-
-            col7, col8 = st.columns(2)
             
+            
+            # Create buttons for date navigation
+            col111, col112,col13,col14 = st.columns(4)
+
+            with col111:
+                if st.button('Previous Day'):
+                    st.session_state = class_data.getdatediff(st.session_state,-1)
+            with col112:
+                if st.button('Next Day'):
+                    st.session_state =class_data.getdatediff(st.session_state,1)
+            chartdate = st.session_state
+            st.write('차트조회일',chartdate)
+            col7, col8 = st.columns(2)
             with col7:
-                df_price = class_data.getstockprice(searchdate, selected_stock, 'M')
+                df_price = class_data.getstockprice(chartdate, selected_stock, 'M')
                 
                 df_price['datetime'] =pd.to_datetime(df_price['datetime'])
-                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart('+str(searchdate)+')', 'date', 'price')
+                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart('+str(chartdate)+')', 'date', 'price')
                 st.plotly_chart(fig_m, use_container_width=True)
             
             with col8:
-                df_price = class_data.getstockprice(searchdate, selected_stock, 'D')
+                df_price = class_data.getstockprice(chartdate, selected_stock, 'D')
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
-                fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title='Daily Price Trends(From a month ago to '+str(searchdate)+')')
+                fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title='Daily Price Trends(From a month ago to '+str(chartdate)+')')
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
 
@@ -322,7 +330,7 @@ if __name__ == "__main__":
             html_table = generate_table(df_gongsi)
             st.markdown(html_table, unsafe_allow_html=True)
         except Exception as e:
-            st.write('해당되는 종목이 없습니다.')
+            st.write('해당되는 종목이 없습니다.',e)
 
     if date and add_selectbox=="🔖관심종목":
         st.write('조회일 : ',date)

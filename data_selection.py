@@ -19,7 +19,9 @@ class Dataselect():
         
     # @st.cache 
     def init_db(self):
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        
+        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             self.db_init = engine.connect()
@@ -197,7 +199,18 @@ class Dataselect():
 
         return df
 
-
+    def getdatediff(self,date,flag):
+        todate = str(date).replace('-','')
+        sql = '''
+            SELECT STOCK.[DBO].[FN_DATESEARCH](?,?) as 'date'
+            '''
+        params = (todate,flag)
+        df = pd.read_sql(sql, con=self.db_init, params=params)
+        if df['date'][0] ==0:
+            date = todate
+        else:
+            date = df['date'][0]
+        return  date
 
     def getmaxdate(self,date,flag):
         todate = str(date).replace('-','')
