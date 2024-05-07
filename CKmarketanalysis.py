@@ -269,7 +269,7 @@ if __name__ == "__main__":
         #     st.write('''
                     
         #     ''')
-        st.write("조회일 ",date,st.session_state)
+        st.write("조회일 ",date)
         col1,col2= st.columns(2)
         with col1:
             stock_conditions = class_data.getconditionlist()
