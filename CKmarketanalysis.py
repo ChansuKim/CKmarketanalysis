@@ -263,8 +263,8 @@ if __name__ == "__main__":
                 st.plotly_chart(fig_d, use_container_width=True)
 
     if date and add_selectbox=="📊주식분석":
-        # if st.session_state==None:
-        #     st.session_state=date
+        if 'chart_date' not in st.session_state:
+            st.session_state['chart_date'] = date
         # with st.expander("See explanation"):
         #     st.write('''
                     
@@ -294,19 +294,25 @@ if __name__ == "__main__":
             st.dataframe(df_aftermarket,hide_index=True)
             
             
-            # # Create buttons for date navigation
-            # col111, col112,col13,col14 = st.columns(4)
+            col111, col112,col13,col14 = st.columns(4)
 
-            # with col111:
-            #     if st.button('Previous Day'):
-            #         st.session_state = class_data.getdatediff(st.session_state,-1)
-            # with col112:
-            #     if st.button('Next Day'):
-            #         st.session_state =class_data.getdatediff(st.session_state,1)
-            # chartdate = st.session_state
-            # st.write('차트조회일',chartdate)
+            try:
+                with col111:
+                    if st.button('Previous Day'):
+                        st.session_state['chart_date'] = class_data.getdatediff(st.session_state['chart_date'],-1)
+                        
+                with col112:
+                    if st.button('Next Day'):
+                        st.session_state['chart_date'] =class_data.getdatediff(st.session_state['chart_date'],1)
+                        
+            except Exception as e:
+                print(e)
+                st.session_state['chart_date'] = date
+                
+            chartdate = st.session_state['chart_date']
+            st.write('차트조회일',chartdate)
 
-            chartdate = searchdate
+            # chartdate = searchdate
             col7, col8 = st.columns(2)
             with col7:
                 df_price = class_data.getstockprice(chartdate, selected_stock, 'M')
