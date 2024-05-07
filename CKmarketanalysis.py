@@ -46,9 +46,6 @@ if __name__ == "__main__":
     date = get_maxdate(todate)
     # Using object notation
     add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'🔖관심종목','💹옵션분석'))
-    if st.session_state==None:
-        st.session_state=date
-
     
     if date and add_selectbox=="🌟대시보드":
         st.subheader('🌟DASH BOARD')
@@ -266,7 +263,8 @@ if __name__ == "__main__":
                 st.plotly_chart(fig_d, use_container_width=True)
 
     if date and add_selectbox=="📊주식분석":
-        # st.session_state=None
+        if st.session_state==None:
+            st.session_state=date
         # with st.expander("See explanation"):
         #     st.write('''
                     
