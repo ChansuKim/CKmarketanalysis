@@ -17,7 +17,6 @@ def generate_table(dataframe):
     return "<table>" + header + "".join(rows) + "</table>"
 
 
-
 def get_maxdate(todate):
     maxdate = class_data.getmaxdate(todate,1)
     if int(todate)>=int(maxdate):
