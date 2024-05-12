@@ -3,7 +3,6 @@ from data_selection import Dataselect  # Assuming you have a separate module for
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
-# from sqlalchemy.util._collections import LRUCache
 
 
 def generate_table(dataframe):
