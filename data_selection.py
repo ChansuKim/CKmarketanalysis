@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import plotly.express as px
 
+
 showErrorDetails = False
 
 class Dataselect():
@@ -17,11 +18,12 @@ class Dataselect():
         self.password = password
         self.date = date
         
-    # @st.cache 
+    
+    # @st.cache_resource
     def init_db(self):
         
-        
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             self.db_init = engine.connect()
@@ -34,7 +36,7 @@ class Dataselect():
     def getCalendar(self, date, termflag, term):
         todate = int(str(date).replace('-', ''))
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            EXEC [SL_GetInformation] ?,?,?,?,?
             '''
         params = (todate,2, termflag, term,'')
         df = pd.read_sql(sql, con=self.db_init, params=params)
@@ -45,11 +47,11 @@ class Dataselect():
         todate = int(str(date).replace('-',''))
         if frame=='D':
             frdate = self.getCalendar(todate,'m','1')
-            sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
+            sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
             params = (frdate,'', code, int(5))
             df = pd.read_sql(sql, con=self.db_init, params=params)
         else:
-            sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
+            sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
             params = ('',todate, code, int(6))
             df = pd.read_sql(sql, con=self.db_init,params=params)
             # df['logtime'] =df['logtime'].apply(lambda x: '0'+str(x) if len(str(x))==3 else x)
@@ -67,7 +69,7 @@ class Dataselect():
     def getstockgongsi(self,date,code):
         todate = int(str(date).replace('-',''))
 
-        sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
+        sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
         params = ('',todate, code, int(8))
         df = pd.read_sql(sql, con=self.db_init,params=params)
         df['logtime'] = df['logtime'].astype(str).str.zfill(4)
@@ -81,14 +83,14 @@ class Dataselect():
         if frame=='d':
             frdate = self.getCalendar(todate,termflag,term)
             sql= '''
-            EXEC stock.[dbo].[SL_GetOption] {},{},{},{},{}
+            EXEC [SL_GetOption] {},{},{},{},{}
             '''.format(frdate,todate,'D',otm,cpflag)            
             df = pd.read_sql(sql, con=self.db_init)
             df['logdate'] =pd.to_datetime(df['logdate'])
             
         else:
             sql = '''
-            EXEC stock.[dbo].[SL_GetOption] {},{},{},{},{}
+            EXEC [SL_GetOption] {},{},{},{},{}
             '''.format(todate,todate,'m',otm,cpflag)
             df = pd.read_sql(sql, con=self.db_init)
             df['logtime'] = df['logtime'].astype(str).str.zfill(4)
@@ -102,7 +104,7 @@ class Dataselect():
     def getstockmater(self,date):
         todate = int(str(date).replace('-',''))
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            EXEC [SL_GetInformation] ?,?,?,?,?
             '''
         params = (todate,1,'','','')
         df = pd.read_sql(sql, con=self.db_init,params=params)
@@ -110,7 +112,7 @@ class Dataselect():
     
     def getinterestedstocklist(self,todate):
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            EXEC [SL_GetInformation] ?,?,?,?,?
             '''
         params = (todate,3,'','','')
         df = pd.read_sql(sql, con=self.db_init,params=params)
@@ -133,11 +135,11 @@ class Dataselect():
         todate = int(str(date).replace('-',''))
         if frame=='D':
             frdate = self.getCalendar(todate,termflag,term)
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
+            sql ="EXEC [SL_GetIndexreturn] ?,?,?"
             params = (frdate, code, 1)
             df = pd.read_sql(sql, con=self.db_init, params=params)
         else:
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
+            sql ="EXEC [SL_GetIndexreturn] ?,?,?"
             params = (todate, code, 2)
             df = pd.read_sql(sql, con=self.db_init,params=params)
             df['logtime'] = df['logtime'].astype(str).str.zfill(4)
@@ -151,11 +153,11 @@ class Dataselect():
         todate = str(date).replace('-','')
         if frame=='D':
             frdate = self.getCalendar(todate,termflag,term)
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
+            sql ="EXEC [SL_GetIndexreturn] ?,?,?"
             params = (frdate, code, 3)
             df = pd.read_sql(sql, con=self.db_init, params=params)
         else:
-            sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
+            sql ="EXEC [SL_GetIndexreturn] ?,?,?"
             params = (todate, code, 4)
             df = pd.read_sql(sql, con=self.db_init, params=params)
             df['logtime'] = df['logtime'].astype(str).str.zfill(4)
@@ -167,14 +169,14 @@ class Dataselect():
     def getindex_fundmental(self,date,code,termflag,term):      
         todate = str(date).replace('-','')
         frdate = self.getCalendar(todate,termflag,term)
-        sql ="EXEC stock.[dbo].[SL_GetIndexreturn] ?,?,?"
+        sql ="EXEC [SL_GetIndexreturn] ?,?,?"
         params = (frdate, code, 5)
         df = pd.read_sql(sql, con=self.db_init, params=params)
         return df
 
     def getthemename(self):
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            EXEC [SL_GetInformation] ?,?,?,?,?
             '''
         params = ('',4,'','','')
         df = pd.read_sql(sql, con=self.db_init,params=params)
@@ -182,7 +184,7 @@ class Dataselect():
     
     def getCurrentPrice(self,date,flag,code):
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            EXEC [SL_GetInformation] ?,?,?,?,?
             '''
         params = (date,flag,'','',code)
         df = pd.read_sql(sql, con=self.db_init,params=params)
@@ -193,7 +195,7 @@ class Dataselect():
     def getthemereturn(self,date,termflag,term,options):
         todate = str(date).replace('-','')
         frdate = self.getCalendar(todate,termflag,term)
-        sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
+        sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
         params = (frdate,todate,options ,7)
         df = pd.read_sql(sql, con=self.db_init,params=params)
 
@@ -202,7 +204,7 @@ class Dataselect():
     def getdatediff(self,date,flag):
         todate = str(date).replace('-','')
         sql = '''
-            SELECT STOCK.[DBO].[FN_DATESEARCH](?,?) as 'date'
+            SELECT [FN_DATESEARCH](?,?) as 'date'
             '''
         params = (todate,flag)
         df = pd.read_sql(sql, con=self.db_init, params=params)
@@ -216,13 +218,13 @@ class Dataselect():
         todate = str(date).replace('-','')
         if flag==1: 
             sql = '''
-                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+                EXEC [SL_GetInformation] ?,?,?,?,?
                 '''
             params = (todate,5, '', '','')
             
         elif flag==2:
             sql = '''
-                EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+                EXEC [SL_GetInformation] ?,?,?,?,?
                 '''
             params = (todate,6, '', '','')
         
@@ -232,7 +234,7 @@ class Dataselect():
     def gettradinginfo(self,date,flag):
         todate = str(date).replace('-','')
         sql = '''
-        EXEC stock.[dbo].[SL_GetTradinginfo] ?,?
+        EXEC [SL_GetTradinginfo] ?,?
         '''
         params = (todate,flag)
         df = pd.read_sql(sql, con=self.db_init, params=params)
@@ -241,7 +243,7 @@ class Dataselect():
     
     def getAftermarketprice(self,date,options,flag):
         todate = str(date).replace('-','')
-        sql ="EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?"
+        sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
         params = ('',todate,options ,4)
         df = pd.read_sql(sql, con=self.db_init,params=params)
         df.columns=['시간외 표준편차','시간외 거래대금','시간외 수익률']
@@ -251,7 +253,7 @@ class Dataselect():
     def getthemestock(self,date,options,flag):
         todate = int(str(date).replace('-',''))
         sql = '''
-        EXEC stock.[dbo].[SL_Getstockreturn] ?,?,?,?
+        EXEC [SL_Getstockreturn] ?,?,?,?
         '''
         params = ('',todate,options,flag)
         df = pd.read_sql(sql, con=self.db_init,params=params)
@@ -274,27 +276,35 @@ class Dataselect():
     def getThemetermreturn(self,date,termflag,term,flag):
         todate = str(date).replace('-','')
         sql = '''
-        EXEC stock.[dbo].[SL_GetThemereturn] ?,?,?,?
+        EXEC [SL_GetThemereturn] ?,?,?,?
 
         '''
         params = (todate,termflag,term,flag)
         df = pd.read_sql(sql, con=self.db_init,params=params)
         df['termret']=round(df['termret'].astype(float)*100,2)
         df['avgamount'] = df['avgamount'].map('{:,.0f}'.format)
+        df['avgshortamount'] = df['avgshortamount'].fillna(0)
         df['avgshortamount'] = df['avgshortamount'].map('{:,.0f}'.format)
         # 컬럼명 변경
         df.columns = ['테마명', '수익률(%)', '평균 거래대금', '평균 공매도 거래대금']
         return df
 
+    def getLastnews(self,code):
+        # todate = int(str(date).replace('-',''))
+        sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
+        params = ('','', code, int(9))
+        df = pd.read_sql(sql, con=self.db_init,params=params)
+        return df
     
     def getTradinglist(self,date,flag):
         todate = str(date).replace('-','')
         sql = '''
-        EXEC stock.[dbo].[SL_GetTradinginfo] ?,?
+        EXEC [SL_GetTradinginfo] ?,?
         '''
         params = (todate,flag)
         df = pd.read_sql(sql, con=self.db_init, params=params)
         return df    
+    
     def create_candlestick_chart(self, df, title, x_label, y_label):
         # x 축에 사용할 컬럼을 결정
         if 'datetime' in df.columns:
@@ -373,7 +383,7 @@ class Dataselect():
         return term, term_flag
 
     def marketcondition(self,date,flag):
-        sql = f"exec stock.[DBO].[SL_GetMainDashBoard] ?, ?"
+        sql = f"exec [SL_GetMainDashBoard] ?, ?"
         params = (date,flag)
         df = pd.read_sql(sql, con=self.db_init, params=params)
         percent_columns = ['D1','W1', 'W3', 'M1', 'M3', 'M6', 'M12', 'M24', 'M36']
@@ -383,7 +393,7 @@ class Dataselect():
 
     def getconditionlist(self):
         sql = '''
-            EXEC stock.[dbo].[SL_GetInformation] ?,?,?,?,?
+            EXEC [SL_GetInformation] ?,?,?,?,?
             '''
         params = ('',10, '', '','')
         df = pd.read_sql(sql, con=self.db_init, params=params)
@@ -391,7 +401,7 @@ class Dataselect():
     
     def getstocklistbycondition(self,date,condition):
         sql = '''
-            EXEC stock.[dbo].[SL_GetStocklistbyCondition] ?,?
+            EXEC [SL_GetStocklistbyCondition] ?,?
             '''
         params = (date,condition)
         df = pd.read_sql(sql, con=self.db_init, params=params)
