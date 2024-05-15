@@ -21,7 +21,6 @@ class Dataselect():
     
     # @st.cache_resource
     def init_db(self):
-        
         connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
@@ -41,7 +40,17 @@ class Dataselect():
         df = pd.read_sql(sql, con=self.db_init, params=params)
         frdate = int(df['frdate'][0])
         return frdate 
-
+    
+    def getBacktest(self, date,flag, termflag, term,etc):
+        todate = int(str(date).replace('-', ''))
+        sql = '''
+            EXEC [SL_GetBacktest] ?,?,?,?,?
+            '''
+        params = (todate,flag, termflag, term,etc)
+        df = pd.read_sql(sql, con=self.db_init, params=params)
+        
+        return df
+    
     def getstockprice(self,date,code,frame):
         todate = int(str(date).replace('-',''))
         if frame=='D':
@@ -82,16 +91,19 @@ class Dataselect():
         if frame=='d':
             frdate = self.getCalendar(todate,termflag,term)
             sql= '''
-            EXEC [SL_GetOption] {},{},{},{},{}
-            '''.format(frdate,todate,'D',otm,cpflag)            
-            df = pd.read_sql(sql, con=self.db_init)
-            df['logdate'] =pd.to_datetime(df['logdate'])
-            
+            EXEC [SL_GetOption] ?,?,?,?,?
+            '''
+            params=(frdate,todate,'D',otm,cpflag)            
+            df = pd.read_sql(sql, con=self.db_init,params=params)
+            df['logdate'] =pd.to_datetime(df['logdate'])     
+
         else:
-            sql = '''
-            EXEC [SL_GetOption] {},{},{},{},{}
-            '''.format(todate,todate,'m',otm,cpflag)
-            df = pd.read_sql(sql, con=self.db_init)
+            sql ='''
+            EXEC [SL_GetOption] ?,?,?,?,?
+            '''
+            params = (todate,todate,'m',otm,cpflag)
+            df = pd.read_sql(sql, con=self.db_init,params=params)
+
             df['logtime'] = df['logtime'].astype(str).str.zfill(4)
             df['logtime'] = df['logtime'].str[:2] + ':' + df['logtime'].str[2:]
             df['datetime'] = df['logdate'].astype(str) + ' ' + df['logtime'] + ':00'
@@ -116,6 +128,19 @@ class Dataselect():
         params = (todate,3,'','','')
         df = pd.read_sql(sql, con=self.db_init,params=params)
         return df
+    
+    def insert_interested_stock(self,interestname,stock_code, stock_name):
+        if self.db_init is None:
+            st.error("Database connection is not established.")
+            return
+        try:
+            # Create a SQL statement
+            sql_statement = text("INSERT INTO stock.dbo.tc_InterestedStocks (stockcode, stockname,ipuser,ipdate) VALUES (:interestname ,:code, :name,:ipuser,:ipdate)")
+            self.db_init.execute(sql_statement, {"interestname": interestname,"code": stock_code, "name": stock_name, "ipuser": 'stock_server', "ipdate": datetime.now()})
+            self.db_init.commit()
+            st.success(f"{stock_name} added to interested stocks successfully!")
+        except Exception as e:
+            st.error(f"Error when inserting stock: {e}")
 
     def getindexprice(self,date,code,frame,termflag,term):
         todate = int(str(date).replace('-',''))
