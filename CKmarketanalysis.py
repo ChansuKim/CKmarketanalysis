@@ -5,7 +5,6 @@ import plotly.express as px
 from datetime import datetime
 # from sqlalchemy.util._collections import LRUCache
 
-
 def generate_table(dataframe):
     # 테이블에 스타일 추가 (글자 크기를 12px로 설정)
     header = "<tr>" + "".join([f"<th style='font-size: 12px;'>{col}</th>" for col in dataframe.columns]) + "</tr>"
