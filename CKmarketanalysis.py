@@ -5,6 +5,7 @@ import plotly.express as px
 from datetime import datetime
 # from sqlalchemy.util._collections import LRUCache
 
+
 def generate_table(dataframe):
     # 테이블에 스타일 추가 (글자 크기를 12px로 설정)
     header = "<tr>" + "".join([f"<th style='font-size: 12px;'>{col}</th>" for col in dataframe.columns]) + "</tr>"
@@ -49,13 +50,14 @@ if __name__ == "__main__":
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
     # Using object notation
-    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'🔖트레이딩','💹옵션분석'))
+    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))
 
 
-
+                
     if date and add_selectbox=="🌟대시보드":
         st.subheader('🌟DASH BOARD')
-        st.write('조건 조회일 : ',date)
+        os_date = class_data.getmaxdate(todate,2)
+        st.write('국내',date,'해외 : ',os_date)
         st.divider()
         with st.container():
             # cols = responsive_columns()
@@ -66,7 +68,7 @@ if __name__ == "__main__":
                 ('한국 원', 9,'FX@KRW'), ('금($/온스)', 9,'CM@NGLD'), ('미국채권,9,10-Year(CBT)',9, '99948'), ('WTI, 원유 뉴욕근월', 9,'CM@PWTI')
             ]
             for label,flag, code in markets:
-                price, delta = class_data.getCurrentPrice(date, flag, code)
+                price, delta = class_data.getCurrentPrice(os_date, flag, code)
                 with cols[idx % len(cols)]:
                     st.metric(label=label, value=price, delta=delta)
                 idx += 1
@@ -76,21 +78,21 @@ if __name__ == "__main__":
         with st.container():      
             with col1:
                 st.markdown('**시장지수**')
-                df = class_data.marketcondition(date,2)
+                df = class_data.marketcondition(os_date,2)
                 st.dataframe(df, use_container_width=True,hide_index=True)
             with col2:
                 st.markdown('**상품**')
-                df = class_data.marketcondition(date,3)
+                df = class_data.marketcondition(os_date,3)
                 st.dataframe(df , use_container_width=True,hide_index=True)
         col3, col4 = st.columns(2)
         with st.container():      
             with col3:
                 st.markdown('**환율**')
-                df = class_data.marketcondition(date,4)
+                df = class_data.marketcondition(os_date,4)
                 st.dataframe(df , use_container_width=True,hide_index=True)
             with col4:
                 st.markdown('**채권**')
-                df = class_data.marketcondition(date,5)
+                df = class_data.marketcondition(os_date,5)
                 st.dataframe(df , use_container_width=True,hide_index=True)
         col5, col6 = st.columns(2)
         with st.container():      
@@ -364,7 +366,6 @@ if __name__ == "__main__":
         except Exception as e:
             st.write('해당되는 종목이 없습니다.',e)
 
-
     if date and add_selectbox=="🔖트레이딩":
         st.subheader('📈트레이딩 지수')
         st.write('조회일 : ',date)
@@ -374,24 +375,35 @@ if __name__ == "__main__":
 
         with col1:
             plot_backtest(date,2,termflag, term, 'U001', 'KOSPI Intraday Return')
+            with st.expander('전략상세'):
+                st.write('코스피지수의 (종가-시가)/시가 를 누적한 전략')
         with col2:
             plot_backtest(date,1, termflag, term,'U001', 'KOSPI Overnight Return')
-            
+            with st.expander('전략상세'):
+                st.write('코스피지수의 (시가-전일종가)/전일종가 를 누적한 전략')
         col3, col4 = st.columns(2)
         with col3:
             plot_backtest(date,2,termflag, term, 'U201', 'KOSDAQ Intraday Return')
+            with st.expander('전략상세'):
+                st.write('코스닥지수의(종가-시가)/시가 를 누적한 전략')
         with col4:
             plot_backtest(date,1,termflag, term, 'U201', 'KOSDAQ Overnight Return')
-        col5, col6 = st.columns(2)
-        with col5:
-            plot_backtest(date,3, termflag, term,'0', 'Option Daily straddle')
+            with st.expander('전략상세'):
+                st.write('코스피지수의 (시가-전일종가)/전일종가 를 누적한 전략')
+
+        # col5, col6 = st.columns(2)
+        # with col5:
+        #     plot_backtest(date,3, termflag, term,'0', 'Option Daily straddle')
 
         col7, col8 = st.columns(2)
         with col7:
             plot_backtest(date,4, termflag, term,'U001', 'KOSPI Volatility Breakout')
+            with st.expander('전략상세'):
+                st.write('코스피지수의 변동성돌파, if price>priceopen + (prehigh-prelow)*0.5 then buy, exit on close')
         with col8:
             plot_backtest(date,4, termflag, term,'U201', 'KOSDAQ Volatility Breakout')
-
+            with st.expander('전략상세'):
+                st.write('코스닥지수의 변동성돌파, if price>priceopen + (prehigh-prelow)*0.5 then buy, exit on close')
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
         st.subheader('📈옵션 현황')
@@ -450,18 +462,3 @@ if __name__ == "__main__":
         st.subheader("Contact")
         st.write("For support, contact me via email: chansoookim@naver.com ")
 
-        # my_bar = st.progress(0)
-        # for percent_complete in range(100):
-        #     time.sleep(0.1)
-        #     my_bar.progress(percent_complete + 1)
-
-        
-    # with st.sidebar:
-    #     st.subheader("Navigation")
-    #     page = st.radio("Go to", ["Home", "Market Analysis", "Stock Insights", "Options", "About"])
-
-    #     st.subheader("Settings")
-    #     st.checkbox("Enable Advanced Features")
-
-    #     st.subheader("Contact")
-    #     st.write("For support, contact us via email: support@ckmarketwizard.com.")

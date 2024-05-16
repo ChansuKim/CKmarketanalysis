@@ -21,6 +21,8 @@ class Dataselect():
     
     # @st.cache_resource
     def init_db(self):
+        
+
         connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
@@ -121,26 +123,6 @@ class Dataselect():
         df = pd.read_sql(sql, con=self.db_init,params=params)
         return df[['stockcode','stockname']]
     
-    def getinterestedstocklist(self,todate):
-        sql = '''
-            EXEC [SL_GetInformation] ?,?,?,?,?
-            '''
-        params = (todate,3,'','','')
-        df = pd.read_sql(sql, con=self.db_init,params=params)
-        return df
-    
-    def insert_interested_stock(self,interestname,stock_code, stock_name):
-        if self.db_init is None:
-            st.error("Database connection is not established.")
-            return
-        try:
-            # Create a SQL statement
-            sql_statement = text("INSERT INTO stock.dbo.tc_InterestedStocks (stockcode, stockname,ipuser,ipdate) VALUES (:interestname ,:code, :name,:ipuser,:ipdate)")
-            self.db_init.execute(sql_statement, {"interestname": interestname,"code": stock_code, "name": stock_name, "ipuser": 'stock_server', "ipdate": datetime.now()})
-            self.db_init.commit()
-            st.success(f"{stock_name} added to interested stocks successfully!")
-        except Exception as e:
-            st.error(f"Error when inserting stock: {e}")
 
     def getindexprice(self,date,code,frame,termflag,term):
         todate = int(str(date).replace('-',''))
