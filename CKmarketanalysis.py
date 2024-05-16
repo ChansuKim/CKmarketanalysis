@@ -32,7 +32,6 @@ def plot_backtest(date,flag, termflag, term,code, title):
     df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
     fig_d = px.line(df_price, x='logdate', y='ret', title=title)
     fig_d.update_layout(autosize=True)
-    print(df_price)
     # x축의 날짜 개수를 더 많이 나오도록 설정
     fig_d.update_xaxes(
         tickformat="%Y-%m-%d",
