@@ -21,8 +21,6 @@ class Dataselect():
     
     # @st.cache_resource
     def init_db(self):
-        
-
         connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
@@ -123,7 +121,6 @@ class Dataselect():
         df = pd.read_sql(sql, con=self.db_init,params=params)
         return df[['stockcode','stockname']]
     
-
     def getindexprice(self,date,code,frame,termflag,term):
         todate = int(str(date).replace('-',''))
         if frame=='D':

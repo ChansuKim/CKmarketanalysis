@@ -49,10 +49,8 @@ if __name__ == "__main__":
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
     # Using object notation
-    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))
+    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'🔖트레이딩'))
 
-
-                
     if date and add_selectbox=="🌟대시보드":
         st.subheader('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
@@ -131,55 +129,54 @@ if __name__ == "__main__":
 
 
     if date and add_selectbox=="🎭테마수익률":
-        st.subheader('📈테마수익률 현황')
+        st.header('📈테마수익률 현황')
         st.write('조회일 : ',date)
-        term, termflag = class_data.select_term_and_flag(default_index=0)
-        tab1,tab2 = st.tabs(['종합현황','테마수익률'])
-
-        with tab1:
-            col1, col2 = st.columns(2)
-            with st.container():      
-                with col1:
-                    st.markdown('**🔝 테마수익률 상위 5**')
-                    df_top_returns  = class_data.getThemetermreturn(date,termflag,term,'1')
-                    st.dataframe(df_top_returns , use_container_width=True,hide_index=True)
-                with col2:
-                    st.markdown('**🔻 테마수익률 하위 5**')
-                    df_bottom_returns  = class_data.getThemetermreturn(date,termflag,term,'2')
-                    st.dataframe(df_bottom_returns, use_container_width=True,hide_index=True)
-            col3, col4 = st.columns(2)
-            with st.container():      
-                with col3:
-                    st.markdown('**🔝 테마거래량 상위 5**')
-                    df_top_vol  = class_data.getThemetermreturn(date,termflag,term,'3')
-                    st.dataframe(df_top_vol , use_container_width=True,hide_index=True)
-                with col4:
-                    st.markdown('**🔻 테마거래량 하위 5**')
-                    df_bottom_vol  = class_data.getThemetermreturn(date,termflag,term,'4')
-                    st.dataframe(df_bottom_vol, use_container_width=True,hide_index=True)
-            col5, col6 = st.columns(2)
-            with st.container():      
-                with col5:
-                    st.markdown('**🔝 테마공매도 상위 5**')
-                    df_top_short  = class_data.getThemetermreturn(date,termflag,term,'5')
-                    st.dataframe(df_top_short , use_container_width=True,hide_index=True)
-                with col6:
-                    st.markdown('**🔻 테마공매도 하위 5**')
-                    df_bottom_short  = class_data.getThemetermreturn(date,termflag,term,'6')
-                    st.dataframe(df_bottom_short, use_container_width=True,hide_index=True) 
-        with tab2:
-            theme_names = class_data.getthemename()
-            theme_options = {f"{row['themecode']} - {row['themename']}": (row['themecode'], row['themename']) for index, row in theme_names.iterrows()}
-            theme_choice = st.selectbox('🔎 테마 선택', list(theme_options.keys()))  
-            selected_themecode, selected_theme = theme_options[theme_choice]
-            
-            if selected_themecode:
-                df_theme_return = class_data.getthemereturn(date, termflag, term, selected_themecode)
-                df_theme_return['logdate'] = pd.to_datetime(df_theme_return['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
-                df_theme_return.set_index('logdate', inplace=True)
-                st.line_chart(df_theme_return)
-                df_theme_stocks = class_data.getthemestock(date, selected_themecode,1)
-                st.dataframe(df_theme_stocks, use_container_width=True,hide_index=True)
+        term, termflag = class_data.select_term_and_flag(default_index=3)
+        st.subheader('종합현황')
+        col1, col2 = st.columns(2)
+        with st.container():      
+            with col1:
+                st.markdown('**🔝 테마수익률 상위 5**')
+                df_top_returns  = class_data.getThemetermreturn(date,termflag,term,'1')
+                st.dataframe(df_top_returns , use_container_width=True,hide_index=True)
+            with col2:
+                st.markdown('**🔻 테마수익률 하위 5**')
+                df_bottom_returns  = class_data.getThemetermreturn(date,termflag,term,'2')
+                st.dataframe(df_bottom_returns, use_container_width=True,hide_index=True)
+        col3, col4 = st.columns(2)
+        with st.container():      
+            with col3:
+                st.markdown('**🔝 테마거래량 상위 5**')
+                df_top_vol  = class_data.getThemetermreturn(date,termflag,term,'3')
+                st.dataframe(df_top_vol , use_container_width=True,hide_index=True)
+            with col4:
+                st.markdown('**🔻 테마거래량 하위 5**')
+                df_bottom_vol  = class_data.getThemetermreturn(date,termflag,term,'4')
+                st.dataframe(df_bottom_vol, use_container_width=True,hide_index=True)
+        col5, col6 = st.columns(2)
+        with st.container():      
+            with col5:
+                st.markdown('**🔝 테마공매도 상위 5**')
+                df_top_short  = class_data.getThemetermreturn(date,termflag,term,'5')
+                st.dataframe(df_top_short , use_container_width=True,hide_index=True)
+            with col6:
+                st.markdown('**🔻 테마공매도 하위 5**')
+                df_bottom_short  = class_data.getThemetermreturn(date,termflag,term,'6')
+                st.dataframe(df_bottom_short, use_container_width=True,hide_index=True) 
+        st.divider()
+        st.subheader('테마수익률')
+        theme_names = class_data.getthemename()
+        theme_options = {f"{row['themecode']} - {row['themename']}": (row['themecode'], row['themename']) for index, row in theme_names.iterrows()}
+        theme_choice = st.selectbox('🔎 테마 선택', list(theme_options.keys()))  
+        selected_themecode, selected_theme = theme_options[theme_choice]
+        
+        if selected_themecode:
+            df_theme_return = class_data.getthemereturn(date, termflag, term, selected_themecode)
+            df_theme_return['logdate'] = pd.to_datetime(df_theme_return['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
+            df_theme_return.set_index('logdate', inplace=True)
+            st.line_chart(df_theme_return)
+            df_theme_stocks = class_data.getthemestock(date, selected_themecode,1)
+            st.dataframe(df_theme_stocks, use_container_width=True,hide_index=True)
 
 
 
@@ -283,33 +280,35 @@ if __name__ == "__main__":
         try:            
             
         
-            with col2:
+            # if stock_choice is not None:
+
+            #     if condition_choice=='유상증자':
+            #         with st.expander('공시내용', expanded=False):
+            #                 st.write('''
+            #                 The chart above shows some numbers I picked for you.
+            #                 I rolled actual dice for these, so they're *guaranteed* to
+            #                 be random.
+            #             ''')
                 stock_list = class_data.getstocklistbycondition(date,condition_choice)
-                stock_options = {f"{row['stockcode']} - {row['stockname']}({round(row['ret']*100,2)}%)": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
-                stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys())) 
-            
-            if stock_choice is not None:
-
-                if condition_choice=='유상증자':
-                    with st.expander('공시내용', expanded=False):
-                            st.write('''
-                            The chart above shows some numbers I picked for you.
-                            I rolled actual dice for these, so they're *guaranteed* to
-                            be random.
-                        ''')
-
-
+                stockcodes = "".join([f"{code}|" for code in stock_list['stockcode']])
+                stockcodes = stockcodes.rstrip('|')
                 searchdate=date
-                selected_stock, stockname = stock_options[stock_choice]
-                df = class_data.getthemestock(searchdate, selected_stock, 2)
-                df_aftermarket = class_data.getAftermarketprice(searchdate, selected_stock, 4)
-                df_all = pd.concat([df, df_aftermarket], axis=1)
-                # df_gongsi = class_data.getstockgongsi(date, selected_stock)
-                st.dataframe(df_all, use_container_width=True,hide_index=True)          
                 
-                # # Create buttons for date navigation
-                col111, col112,col13,col14 = st.columns(4)
+                df = class_data.getthemestock(searchdate, stockcodes, 2)
+                st.dataframe(df, use_container_width=True,hide_index=True)          
+                    
 
+                col3,col4= st.columns(2)
+                with col3:
+                    stock_options = {f"{row['stockcode']} - {row['stockname']}({round(row['ret']*100,2)}%)": (row['stockcode'], row['stockname']) for index, row in stock_list.iterrows()}
+                    stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys())) 
+                    selected_stock, stockname = stock_options[stock_choice]
+                    df_aftermarket = class_data.getAftermarketprice(searchdate, selected_stock, 4)
+                with col4:
+                    st.dataframe(df_aftermarket, use_container_width=True,hide_index=True)        
+                    # # Create buttons for date navigation
+                col111, col112,col13,col14 = st.columns(4)
+                  
                 try:
                     with col111:
                         if st.button('Previous Day'):
@@ -373,86 +372,102 @@ if __name__ == "__main__":
         col1, col2 = st.columns(2)
 
         with col1:
-            plot_backtest(date,2,termflag, term, 'U001', 'KOSPI Intraday Return')
-            with st.expander('전략상세'):
-                st.write('코스피지수의 (종가-시가)/시가 를 누적한 전략')
+            with st.expander('KOSPI누적장중수익률'):
+                st.write('''
+                **KOSPI 누적 장중 수익률 전략 설명:**
+                - 코스피 지수의 (종가 - 시가) / 시가 를 누적하는 전략입니다.
+                - 매일 장 시작 시의 시가와 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
+                - 이를 시가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
+                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                - 이 전략은 시장의 장중 변동성을 활용하여 수익을 창출하는 것을 목표로 합니다.
+                ''')
+            plot_backtest(date, 2, termflag, term, 'U001', 'KOSPI 누적 장중 수익률')
+
         with col2:
-            plot_backtest(date,1, termflag, term,'U001', 'KOSPI Overnight Return')
-            with st.expander('전략상세'):
-                st.write('코스피지수의 (시가-전일종가)/전일종가 를 누적한 전략')
+
+            with st.expander('KOSPI누적오버나잇수익률'):
+                st.write('''
+                **KOSPI 누적 오버나잇 수익률 전략 설명:**
+                - 코스피 지수의 (시가 - 전일 종가) / 전일 종가 를 누적하는 전략입니다.
+                - 매일 장 시작 시의 시가와 전일 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
+                - 이를 전일 종가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
+                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                - 이 전략은 주로 오버나잇(장외) 변동성을 활용하여 수익을 창출하는 것을 목표로 합니다.
+                ''')
+            plot_backtest(date, 1, termflag, term, 'U001', 'KOSPI 누적 오버나잇 수익률')
+
         col3, col4 = st.columns(2)
         with col3:
-            plot_backtest(date,2,termflag, term, 'U201', 'KOSDAQ Intraday Return')
-            with st.expander('전략상세'):
-                st.write('코스닥지수의(종가-시가)/시가 를 누적한 전략')
+
+            with st.expander('KOSDAQ누적장중수익률'):
+                st.write('''
+                **KOSDAQ 누적 장중 수익률 전략 설명:**
+                - 코스닥 지수의 (종가 - 시가) / 시가 를 누적하는 전략입니다.
+                - 매일 장 시작 시의 시가와 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
+                - 이를 시가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
+                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                - 이 전략은 시장의 장중 변동성을 활용하여 수익을 창출하는 것을 목표로 합니다.
+                ''')
+            plot_backtest(date, 2, termflag, term, 'U201', 'KOSDAQ 누적 장중 수익률')
         with col4:
-            plot_backtest(date,1,termflag, term, 'U201', 'KOSDAQ Overnight Return')
-            with st.expander('전략상세'):
-                st.write('코스피지수의 (시가-전일종가)/전일종가 를 누적한 전략')
 
-        # col5, col6 = st.columns(2)
-        # with col5:
-        #     plot_backtest(date,3, termflag, term,'0', 'Option Daily straddle')
+            with st.expander('KOSDAQ누적오버나잇수익률'):
+                st.write('''
+                **KOSDAQ 누적 오버나잇 수익률 전략 설명:**
+                - 코스닥 지수의 (시가 - 전일 종가) / 전일 종가 를 누적하는 전략입니다.
+                - 매일 장 시작 시의 시가와 전일 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
+                - 이를 전일 종가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
+                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                - 이 전략은 주로 오버나잇(장외) 변동성을 활용하여 수익을 창출하는 것을 목표로 합니다.
+                ''')
+            plot_backtest(date, 1, termflag, term, 'U201', 'KOSDAQ 누적 오버나잇 수익률')
 
+        col5, col6 = st.columns(2)
+        with col5:
+            
+            with st.expander('K200옵션 등가양합'):
+                st.write('''
+                **등가 양합 전략 설명:**
+                - 양합은 행사가가 같은 콜옵션과 풋옵션의 합 중 가장 낮은 합을 말합니다.
+                - 일반적으로 등가의 합이 가장 낮지만 항상 그렇지는 않습니다.
+                - 변동성 또는 변동 기대감이 수반되지 않으면 그래프는 우하향합니다.
+                - 양합 그래프는 장의 변동성을 가장 쉽고 직관적으로 표현합니다.
+                ''')
+            plot_backtest(date, 3, termflag, term, '0', 'K200옵션등가 양합')
+
+        with col6:
+
+            with st.expander('등가 Put-Call 거래량 비율'):
+                st.write('''
+                **등가 Put-Call 거래량 비율:**
+                - 풋콜 거래량 비율(Put-Call Volume Ratio)
+                - 비율 > 1: 시장 참가자들이 주로 풋 옵션을 매수하고 있음을 의미하며, 이는 시장의 하락에 대한 대비가 더 많음을 나타낼 수 있습니다.
+                - 비율 < 1: 시장 참가자들이 주로 콜 옵션을 매수하고 있음을 의미하며, 이는 시장의 상승에 대한 기대가 더 많음을 나타낼 수 있습니다.
+                ''')
+            plot_backtest(date, 4, termflag, term, '0', '등가 Put-Call 거래량 비율')
         col7, col8 = st.columns(2)
         with col7:
-            plot_backtest(date,4, termflag, term,'U001', 'KOSPI Volatility Breakout')
-            with st.expander('전략상세'):
-                st.write('코스피지수의 변동성돌파, if price>priceopen + (prehigh-prelow)*0.5 then buy, exit on close')
+
+            with st.expander('코스피 변동성돌파'):
+                st.write('''
+                **KOSPI Volatility Breakout 전략 설명:**
+                - 코스피 지수의 변동성 돌파 전략입니다.
+                - 당일 가격이 당일 시가 + (전일 고가 - 전일 저가) * 0.5 보다 높으면 매수 신호를 발생시킵니다.
+                - 매수 후 당일 종가에 포지션을 청산합니다.
+                - 이 전략은 시장의 변동성을 이용하여 단기적인 수익을 추구합니다.
+                ''')
+            plot_backtest(date, 5, termflag, term, 'U001', 'KOSPI Volatility Breakout')
         with col8:
-            plot_backtest(date,4, termflag, term,'U201', 'KOSDAQ Volatility Breakout')
-            with st.expander('전략상세'):
-                st.write('코스닥지수의 변동성돌파, if price>priceopen + (prehigh-prelow)*0.5 then buy, exit on close')
-    if date and add_selectbox=="💹옵션분석":
-        st.write('조회일 : ',date)
-        st.subheader('📈옵션 현황')
-                    
-        option_metrics = {
-            'priceclose' : 'Price',
-            'nonpaid' : 'Call OpenInterest',
-            'iv': 'Implied Volatility',
-            'delta': 'Delta',
-            'gamma': 'Gamma',
-            'theta': 'Theta',
-            'vega': 'Vega'
-        }
 
-        tab1,tab2 = st.tabs(['Daily','Intraday'])
-
-        with tab1:
-            term, termflag = class_data.select_term_and_flag(default_index=2)
-
-            col3,col4 = st.columns(2)
-            with col3:
-                df_option = class_data.getoptionprice(date,'d',0,'c',termflag,term)
-                # Generate and display charts for Call options
-                for metric, desc in option_metrics.items():
-                    fig = class_data.create_line_chart(df_option, f'Call {desc}', 'logdate', metric)
-                    st.plotly_chart(fig, use_container_width=True)
-
-            with col4:
-                df_option = class_data.getoptionprice(date,'d',0,'p',termflag,term)
-                # Generate and display charts for Call options
-                for metric, desc in option_metrics.items():
-                    fig = class_data.create_line_chart(df_option, f'Put {desc}', 'logdate', metric)
-                    st.plotly_chart(fig, use_container_width=True)
-
-        with tab2:
-            col1,col2 = st.columns(2)
-            with col1:
-                df_option = class_data.getoptionprice(date,'m',0,'c',None,None)
-                # Generate and display charts for Call options
-                for metric, desc in option_metrics.items():
-                    fig = class_data.create_line_chart(df_option, f'Call {desc}', 'datetime', metric)
-                    st.plotly_chart(fig, use_container_width=True)
-
-
-            with col2:
-                df_option = class_data.getoptionprice(date,'m',0,'p',None,None)
-                # Generate and display charts for Call options
-                for metric, desc in option_metrics.items():
-                    fig = class_data.create_line_chart(df_option, f'Put {desc}', 'datetime', metric)
-                    st.plotly_chart(fig, use_container_width=True)
+            with st.expander('코스닥 변동성돌파'):
+                st.write('''
+                **KOSDAQ Volatility Breakout 전략 설명:**
+                - 코스닥 지수의 변동성 돌파 전략입니다.
+                - 당일 가격이 당일 시가 + (전일 고가 - 전일 저가) * 0.5 보다 높으면 매수 신호를 발생시킵니다.
+                - 매수 후 당일 종가에 포지션을 청산합니다.
+                - 이 전략은 시장의 변동성을 이용하여 단기적인 수익을 추구합니다.
+                ''')
+            plot_backtest(date, 5, termflag, term, 'U201', 'KOSDAQ Volatility Breakout')
 
     #사이드바 추가 기능
     with st.sidebar:
