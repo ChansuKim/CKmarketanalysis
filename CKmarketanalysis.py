@@ -3,18 +3,32 @@ from data_selection import Dataselect  # Assuming you have a separate module for
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+import re
 # from sqlalchemy.util._collections import LRUCache
 
-
-def generate_table(dataframe):
-    # 테이블에 스타일 추가 (글자 크기를 12px로 설정)
-    header = "<tr>" + "".join([f"<th style='font-size: 12px;'>{col}</th>" for col in dataframe.columns]) + "</tr>"
+def generate_table(dataframe, tablename):
+    title = f"<h5>{tablename}</h5>"
+    # 테이블의 전체 글자 크기를 줄이는 스타일 추가
+    table_style = "<style>table, th, td { font-size: 12px; }</style>"
+    header = "<tr>" + "".join([f"<th>{col}</th>" for col in dataframe.columns]) + "</tr>"
     rows = []
     for _, row in dataframe.iterrows():
-        rows.append("<tr>" + "".join([
-            f'<td style="font-size: 12px;"><a href="{row["URL"]}" target="_blank"><i class="fas fa-link"></i></a></td>' if col == 'URL' else f'<td style="font-size: 12px;">{value}</td>' 
-            for col, value in row.items()]) + "</tr>")
-    return "<table>" + header + "".join(rows) + "</table>"
+        row_html = []
+        for col, value in row.items():
+            if col == 'URL':
+                cell_html = f'<td><a href="{value}" target="_blank"><i class="fas fa-link"></i></a></td>'
+            elif col == 'summary':
+                # '-'를 기준으로 줄바꿈 추가
+                formatted_value = re.sub(r'^-|(?!^)-', '<br>-', value).replace('<br>', '', 1)
+                cell_html = f'<td title="{value}">{formatted_value}</td>'
+            else:
+                cell_html = f'<td>{value}</td>'
+            row_html.append(cell_html)
+        rows.append("<tr>" + "".join(row_html) + "</tr>")
+    return title + table_style + "<table>" + header + "".join(rows) + "</table>"
+
+
+
 
 
 
@@ -52,6 +66,25 @@ if __name__ == "__main__":
     add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))
 
 
+    with st.sidebar:
+        st.subheader("🆕 Data Batch Status")
+        
+        # 데이터 처리 상태 가져오기
+        dm_date_a1 = class_data.getDataProcess('a1')
+        dm_date_b1 = class_data.getDataProcess('b1')
+        
+        # 데이터 처리 상태 출력
+        st.write(f'🏠 국내데이터 {dm_date_a1} 완료')
+        st.write(f'🌐 해외데이터 {dm_date_b1} 완료')
+        
+        # 최신 뉴스와 업데이트 입력 필드
+        st.text_area("📰 업데이트", height=100)
+        
+        # 연락처 섹션
+        st.subheader("📞 Contact")
+        st.write("📧 For support, contact me via email: chansoookim@naver.com ")
+    
+                
     if date and add_selectbox=="🌟대시보드":
         st.subheader('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
@@ -347,20 +380,23 @@ if __name__ == "__main__":
                 df_lastnews = class_data.getLastnews(selected_stock)
                 df_gongsi = class_data.getstockgongsi(date, selected_stock)
                 # st.dataframe(df_all, use_container_width=True,hide_index=True)
-                col9,col10 = st.columns(2)
-                with col9:
-                    st.markdown("""
-                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-                    """, unsafe_allow_html=True)
-                    html_table = generate_table(df_gongsi)
-                    st.markdown(html_table, unsafe_allow_html=True)
+                # col9,col10 = st.columns(2)
+                # with col9:
+                
+                st.markdown("""
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                """, unsafe_allow_html=True)
+                html_table = generate_table(df_lastnews,'종목뉴스')
+                st.markdown(html_table, unsafe_allow_html=True)
+                
+                st.markdown("""
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                """, unsafe_allow_html=True)
+                html_table = generate_table(df_gongsi,'종목공시')
+                st.markdown(html_table, unsafe_allow_html=True)
                     
-                with col10:
-                    st.markdown("""
-                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-                    """, unsafe_allow_html=True)
-                    html_table = generate_table(df_lastnews)
-                    st.markdown(html_table, unsafe_allow_html=True)
+                # with col10:
+
 
         except Exception as e:
             st.write('해당되는 종목이 없습니다.',e)
@@ -516,28 +552,3 @@ if __name__ == "__main__":
                     fig = class_data.create_line_chart(df_option, f'Put {desc}', 'datetime', metric)
                     st.plotly_chart(fig, use_container_width=True)
 
-    #사이드바 추가 기능
-    with st.sidebar:
-        st.subheader("📰 Data Batch Status")
-        
-        # 데이터 처리 상태 가져오기
-        dm_date_a1 = class_data.getDataProcess('a1')
-        dm_date_b1 = class_data.getDataProcess('b1')
-        
-        # 데이터 처리 상태 출력
-        st.write(f'🏠 국내데이터 {dm_date_a1} 완료')
-        st.write(f'🌐 해외데이터 {dm_date_b1} 완료')
-        
-        # 최신 뉴스와 업데이트 입력 필드
-        st.text_area("🆕 최신 뉴스와 업데이트", height=100)
-        
-        # 연락처 섹션
-        st.subheader("📞 Contact")
-        st.write("📧 For support, contact me via email: chansoookim@naver.com ")
-    
-        # my_bar = st.progress(0)
-        # for percent_complete in range(100):
-        #     time.sleep(0.1)
-        #     my_bar.progress(percent_complete + 1)
-
-        
