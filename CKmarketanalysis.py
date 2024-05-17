@@ -287,13 +287,13 @@ if __name__ == "__main__":
                 df_price = class_data.getindexprice_sugup(date, 'u001','D',termflag,term)
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSPI_수급추이")
-                fig_d.update_layout(autosize=True)
+                fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
                 st.plotly_chart(fig_d, use_container_width=True)
             with col12:
                 df_price = class_data.getindexprice_sugup(date, 'u201','D',termflag,term)
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSDAQ_수급추이")
-                fig_d.update_layout(autosize=True)
+                fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
                 st.plotly_chart(fig_d, use_container_width=True)
 
             col13,col14 = st.columns(2)
@@ -311,7 +311,7 @@ if __name__ == "__main__":
                             row=2, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrLndrKosdaq'], mode='lines', name='신용거래대주 코스닥'),
                             row=2, col=1)
-                fig.update_layout(title_text='신용공여추이', autosize=True, height=600)
+                fig.update_layout(title_text='신용공여추이', autosize=True, height=600,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
                 st.plotly_chart(fig, use_container_width=True)
 
                 
@@ -329,7 +329,7 @@ if __name__ == "__main__":
                             row=3, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['ucolMnyVsOppsTrdRlImpt'], mode='lines', name='반대매매/미수금'),
                             row=4, col=1)
-                fig.update_layout(title_text='증시자금추이', autosize=True, height=600)
+                fig.update_layout(title_text='증시자금추이', autosize=True, height=600,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
                 st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
