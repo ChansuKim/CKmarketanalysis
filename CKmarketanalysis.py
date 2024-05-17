@@ -4,29 +4,48 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 import re
-# from sqlalchemy.util._collections import LRUCache
 
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+# from sqlalchemy.util._collections import LRUCache
 def generate_table(dataframe, tablename):
     title = f"<h5>{tablename}</h5>"
-    # 테이블의 전체 글자 크기를 줄이는 스타일 추가
-    table_style = "<style>table, th, td { font-size: 12px; }</style>"
+    table_style = """
+    <style>
+        table, th, td { font-size: 12px; }
+        .center { text-align: center; }
+    </style>
+    """
     header = "<tr>" + "".join([f"<th>{col}</th>" for col in dataframe.columns]) + "</tr>"
     rows = []
+    
+    # 이모지 매핑
+    emoji_map = {
+        0: '😡',
+        1: '😟',
+        2: '😐',
+        3: '🙂',
+        4: '😀',
+        5: '😍'
+    }
+    
     for _, row in dataframe.iterrows():
         row_html = []
         for col, value in row.items():
             if col == 'URL':
                 cell_html = f'<td><a href="{value}" target="_blank"><i class="fas fa-link"></i></a></td>'
             elif col == 'summary':
-                # '-'를 기준으로 줄바꿈 추가
                 formatted_value = re.sub(r'^-|(?!^)-', '<br>-', value).replace('<br>', '', 1)
                 cell_html = f'<td title="{value}">{formatted_value}</td>'
+            elif col == 'sentiment score':
+                emoji = emoji_map.get(value, '')
+                cell_html = f'<td class="center">{value} {emoji}</td>'
             else:
                 cell_html = f'<td>{value}</td>'
             row_html.append(cell_html)
         rows.append("<tr>" + "".join(row_html) + "</tr>")
+    
     return title + table_style + "<table>" + header + "".join(rows) + "</table>"
-
 
 
 
@@ -54,8 +73,8 @@ def plot_backtest(date,flag, termflag, term,code, title):
     st.plotly_chart(fig_d, use_container_width=True)
 
 if __name__ == "__main__":
-    st.set_page_config(layout="wide", page_title="CK Market wizard")    
-    st.header('🌍 CK Market wizard')
+    st.set_page_config(layout="wide", page_title="CK Market Wizard")    
+    st.header('🌍 CK Market Wizard')
     
     date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
     class_data = Dataselect(date,st.secrets["server"],st.secrets["database"],st.secrets["username"],st.secrets["password"])
@@ -63,11 +82,9 @@ if __name__ == "__main__":
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
     # Using object notation
-    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))
-
-
     with st.sidebar:
-        st.subheader("🆕 Data Batch Status")
+        add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))    
+        st.header("🆕 Data Batch Status")
         
         # 데이터 처리 상태 가져오기
         dm_date_a1 = class_data.getDataProcess('a1')
@@ -78,15 +95,22 @@ if __name__ == "__main__":
         st.write(f'🌐 해외데이터 {dm_date_b1} 완료')
         
         # 최신 뉴스와 업데이트 입력 필드
-        st.text_area("📰 업데이트", height=100)
+        st.header("📰 업데이트 내역")
+        st.write('''
+                 1. 시장분석 - 투자자예탁금, 신용공여 데이터 업데이트
+                 2. 옵션분석 - 옵션지표 설명글 추가
+                 3. 트레이딩 - 트레이딩 설명글 추가
+                 4. 주식분석 - 뉴스 요약 추가
+                 
+                 ''')
         
         # 연락처 섹션
-        st.subheader("📞 Contact")
+        st.header("📞 Contact")
         st.write("📧 For support, contact me via email: chansoookim@naver.com ")
     
-                
+    
     if date and add_selectbox=="🌟대시보드":
-        st.subheader('🌟DASH BOARD')
+        st.header('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
         st.write('국내',date,'해외 : ',os_date)
         st.divider()
@@ -214,9 +238,9 @@ if __name__ == "__main__":
 
 
 
-    if date and add_selectbox=="📈시장지수":
+    if date and add_selectbox=="📈시장분석":
         st.write('조회일 : ',date)
-        st.subheader('📈 시장지수 분석')
+        st.header('📈 국내시장현황')
         tab1,tab2 = st.tabs(['Daily','Intraday'])
         # Display dataframe with better visibility
 
@@ -262,15 +286,51 @@ if __name__ == "__main__":
             with col11:
                 df_price = class_data.getindexprice_sugup(date, 'u001','D',termflag,term)
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
-                fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSPI_sugup Trends")
+                fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSPI_수급추이")
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
             with col12:
                 df_price = class_data.getindexprice_sugup(date, 'u201','D',termflag,term)
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
-                fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSDAQ_sugup Trends")
+                fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSDAQ_수급추이")
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
+
+            col13,col14 = st.columns(2)
+            with col13:
+                df_price = class_data.getmarketinfo(date,termflag,term,10)
+                df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
+                # 서브플롯 생성
+                fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.1,
+                                    subplot_titles=('신용거래 융자', '신용거래 대주'))
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrFingScrs'], mode='lines', name='신용거래융자 유가증권'),
+                            row=1, col=1)
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrFingKosdaq'], mode='lines', name='신용거래융자 코스닥'),
+                            row=1, col=1)
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrLndrScrs'], mode='lines', name='신용거래대주 유가증권'),
+                            row=2, col=1)
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrLndrKosdaq'], mode='lines', name='신용거래대주 코스닥'),
+                            row=2, col=1)
+                fig.update_layout(title_text='신용공여', autosize=True, height=600)
+                st.plotly_chart(fig, use_container_width=True)
+
+                
+            with col14:
+                df_price = class_data.getmarketinfo(date,termflag,term,11)
+                df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
+                fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.1,
+                                    subplot_titles=('투자자 예탁금', '미수금','반대매매','반대매매비중'))
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['invrDpsgAmt'], mode='lines', name='투자자 예탁금'),
+                            row=1, col=1)
+                
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['brkTrdUcolMny'], mode='lines', name='위탁매매 미수금'),
+                            row=2, col=1)
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['brkTrdUcolMnyVsOppsTrdAmt'], mode='lines', name='미수금 대비 반대매매 금액'),
+                            row=3, col=1)
+                fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['ucolMnyVsOppsTrdRlImpt'], mode='lines', name='반대매매/미수금'),
+                            row=4, col=1)
+                fig.update_layout(title_text='신용공여', autosize=True, height=600)
+                st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
             col1, col2 = st.columns(2)
@@ -402,7 +462,7 @@ if __name__ == "__main__":
             st.write('해당되는 종목이 없습니다.',e)
 
     if date and add_selectbox=="🔖트레이딩":
-        st.subheader('📈트레이딩 지수')
+        st.header('📈트레이딩 지수')
         st.write('조회일 : ',date)
         term, termflag = class_data.select_term_and_flag(options=('1일','1주','1개월','2개월','3개월','6개월','1년'))
     
@@ -481,7 +541,7 @@ if __name__ == "__main__":
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
         term, termflag = class_data.select_term_and_flag(default_index=2)
-        st.subheader('📈옵션 현황')
+        st.header('📈옵션 현황')
         col5, col6 = st.columns(2)
         with col5:
             

@@ -251,6 +251,15 @@ class Dataselect():
         df = pd.read_sql(sql, con=self.db_init,params=params)
         df.columns=['시간외 표준편차','시간외 거래대금','시간외 수익률']
         return df
+    
+
+    def getmarketinfo(self,date,termflag,term,flag):
+        todate = str(date).replace('-','')
+        frdate = self.getCalendar(todate,termflag,term)
+        sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
+        params = (frdate,todate,'',flag)
+        df = pd.read_sql(sql, con=self.db_init,params=params)
+        return df
 
 
     def getthemestock(self,date,options,flag):
