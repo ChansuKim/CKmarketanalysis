@@ -119,14 +119,20 @@ if __name__ == "__main__":
             cols = st.columns(8)
             idx = 0
             markets = [
-                ('KOSPI',7, 'U001'), ('KOSDAQ',7, 'U201'), ('S&P500',8, 'SPX'), ('NASDAQ',8, 'COMP'),
-                ('한국 원', 9,'FX@KRW'), ('금($/온스)', 9,'CM@NGLD'), ('미국채권,9,10-Year(CBT)',9, '99948'), ('WTI, 원유 뉴욕근월', 9,'CM@PWTI')
+                ('KOSPI', 7, 'U001'), ('KOSDAQ', 7, 'U201'), ('S&P500', 8, 'SPX'), ('NASDAQ', 8, 'COMP'),
+                ('한국 원', 9, 'FX@KRW'), ('금($/온스)', 9, 'CM@NGLD'), ('미국채권, 9, 10-Year(CBT)', 9, '99948'), ('WTI, 원유 뉴욕근월', 9, 'CM@PWTI')
             ]
-            for label,flag, code in markets:
-                price, delta = class_data.getCurrentPrice(os_date, flag, code)
+        
+            for label, flag, code in markets:
+                if label in ['KOSPI', 'KOSDAQ']:
+                    price, delta = class_data.getCurrentPrice(date, flag, code)
+                else:
+                    price, delta = class_data.getCurrentPrice(os_date, flag, code)
+                
                 with cols[idx % len(cols)]:
                     st.metric(label=label, value=price, delta=delta)
                 idx += 1
+
 
         st.divider()
         col1, col2 = st.columns(2)
