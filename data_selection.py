@@ -40,6 +40,8 @@ class Dataselect():
         df = pd.read_sql(sql, con=self.db_init, params=params)
         frdate = int(df['frdate'][0])
         return frdate 
+
+   
     
     def getBacktest(self, date,flag, termflag, term,etc):
         todate = int(str(date).replace('-', ''))
@@ -121,6 +123,17 @@ class Dataselect():
         df = pd.read_sql(sql, con=self.db_init,params=params)
         return df[['stockcode','stockname']]
     
+    
+    def getDataProcess(self,flag):
+        
+        sql = '''
+            EXEC [SL_GetInformation] ?,?,?,?,?
+            '''
+        params = ('',12,'','',flag)
+        df = pd.read_sql(sql, con=self.db_init,params=params)
+        return df['logdate'][0]
+
+
     def getindexprice(self,date,code,frame,termflag,term):
         todate = int(str(date).replace('-',''))
         if frame=='D':
