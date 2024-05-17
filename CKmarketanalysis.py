@@ -315,7 +315,7 @@ if __name__ == "__main__":
                             row=2, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrLndrKosdaq'], mode='lines', name='신용거래대주 코스닥'),
                             row=2, col=1)
-                fig.update_layout(title_text='신용공여', autosize=True, height=600)
+                fig.update_layout(title_text='신용공여추이', autosize=True, height=600)
                 st.plotly_chart(fig, use_container_width=True)
 
                 
@@ -333,7 +333,7 @@ if __name__ == "__main__":
                             row=3, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['ucolMnyVsOppsTrdRlImpt'], mode='lines', name='반대매매/미수금'),
                             row=4, col=1)
-                fig.update_layout(title_text='신용공여', autosize=True, height=600)
+                fig.update_layout(title_text='증시자금추이', autosize=True, height=600)
                 st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
