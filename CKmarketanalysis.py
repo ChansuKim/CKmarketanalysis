@@ -49,91 +49,9 @@ if __name__ == "__main__":
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
     # Using object notation
-    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'💹옵션분석','💸종베','🔖트레이딩'))
+    add_selectbox = st.sidebar.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장지수","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))
 
 
-    
-    if date and add_selectbox=="💸종베":
-        st.subheader('📈 매수종목 분석')
-        trading_list = class_data.getTradinglist(date,2)
-        selected_stock = st.selectbox('🔎 종목 선택', trading_list['stockcode'])
-        trading_df = class_data.gettradinginfo(date,1)
-        st.dataframe(trading_df,hide_index=True)
-        df = class_data.getthemestock(date, selected_stock, 2)
-        df_aftermarket = class_data.getAftermarketprice(date, selected_stock, 4)
-
-        df_all = pd.concat([df, df_aftermarket], axis=1)
-        df_lastnews = class_data.getLastnews(selected_stock)
-        df_gongsi = class_data.getstockgongsi(date, selected_stock)
-        st.dataframe(df_all, use_container_width=True,hide_index=True)
-        col7,col8 = st.columns(2)
-        with col7:
-            st.markdown("""
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-            """, unsafe_allow_html=True)
-            html_table = generate_table(df_gongsi)
-            st.markdown(html_table, unsafe_allow_html=True)
-            
-        with col8:
-            st.markdown("""
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-            """, unsafe_allow_html=True)
-            html_table = generate_table(df_lastnews)
-            st.markdown(html_table, unsafe_allow_html=True)
-            
-            # st.dataframe(df_lastnews,hide_index=True)
-            
-        
-        # Set up columns for charts
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            df_price = class_data.getstockprice(date, selected_stock, 'M')
-            
-            df_price['datetime'] =pd.to_datetime(df_price['datetime'])
-            fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart', 'date', 'price')
-            # 차트를 Streamlit에 표시합니다.
-            st.plotly_chart(fig_m, use_container_width=True)
-        
-        with col2:
-            df_price = class_data.getstockprice(date, selected_stock, 'D')
-            df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
-            fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title="Daily Price Trends")
-            fig_d.update_layout(autosize=True)
-            st.plotly_chart(fig_d, use_container_width=True)
-
-
-        frdate = class_data.getCalendar(date,'m',6)
-        col4, col5, col6 = st.columns(3) 
-        df = class_data.gettradinginfo(frdate,3)
-        df_st1 = df[df['strategy']=='jongbe_new'][['logdate','ret']]
-        df_st1['cumret'] = (1 + df_st1['ret']).cumprod()
-        df_st2 = df[df['strategy']=='jongbe_new2'][['logdate','ret']]
-        df_st2['cumret'] = (1 + df_st2['ret']).cumprod()
-        df_st3 = df[df['strategy']=='jongbe_new3'][['logdate','ret']]
-        df_st3['cumret'] = (1 + df_st3['ret']).cumprod()
-        with st.container():          
-            with col4:
-                # st.markdown('**strategy1**')
-                df_st1['logdate'] = pd.to_datetime(df_st1['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
-                fig = px.line(df_st1,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 1 Cumulative Return')
-                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
-                st.plotly_chart(fig, use_container_width=True)
-
-            with col5:
-                # st.markdown('**strategy2**')
-                df_st2['logdate'] = pd.to_datetime(df_st2['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
-                fig = px.line(df_st2,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 2 Cumulative Return')
-                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
-                st.plotly_chart(fig, use_container_width=True)
-                
-            with col6:
-                # st.markdown('**strategy3**')
-                df_st3['logdate'] = pd.to_datetime(df_st3['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
-                fig = px.line(df_st3,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 3 Cumulative Return')
-                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
-                st.plotly_chart(fig, use_container_width=True)
-                
     if date and add_selectbox=="🌟대시보드":
         st.subheader('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
