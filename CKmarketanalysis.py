@@ -87,6 +87,12 @@ def plot_backtest_multiple(date, flag, termflag, term, codes):
 if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market Wizard")    
     st.header('🌍 CK Market Wizard')
+
+    st.markdown('''
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9866655114544780"
+     crossorigin="anonymous"></script>
+                '''
+                , unsafe_allow_html=True)
     
     add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))    
     date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
