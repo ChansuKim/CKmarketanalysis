@@ -64,7 +64,7 @@ def plot_backtest_single(date,flag, termflag, term,code, title):
     df_price = class_data.getBacktest(date, flag, termflag, term, code)
     df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
     fig_d = px.line(df_price, x='logdate', y='ret', title=title)
-    fig_d.update_layout(autosize=True)
+    fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
     # x축의 날짜 개수를 더 많이 나오도록 설정
     fig_d.update_xaxes(
         tickformat="%Y-%m-%d",
@@ -80,7 +80,7 @@ def plot_backtest_multiple(date, flag, termflag, term, codes):
         df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
         fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['ret'], mode='lines', name=label))
     
-    fig.update_layout(autosize=True)
+    fig.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
     fig.update_xaxes(tickformat="%Y-%m-%d", nticks=10)
     st.plotly_chart(fig, use_container_width=True)
 
