@@ -60,7 +60,7 @@ def get_maxdate(todate):
     return date
 
 
-def plot_backtest(date,flag, termflag, term,code, title):
+def plot_backtest_single(date,flag, termflag, term,code, title):
     df_price = class_data.getBacktest(date, flag, termflag, term, code)
     df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
     fig_d = px.line(df_price, x='logdate', y='ret', title=title)
@@ -72,18 +72,32 @@ def plot_backtest(date,flag, termflag, term,code, title):
     )
     st.plotly_chart(fig_d, use_container_width=True)
 
+def plot_backtest_multiple(date, flag, termflag, term, codes):
+    fig = go.Figure()
+    
+    for code, label in codes.items():
+        df_price = class_data.getBacktest(date, flag, termflag, term, code)
+        df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
+        fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['ret'], mode='lines', name=label))
+    
+    fig.update_layout(autosize=True)
+    fig.update_xaxes(tickformat="%Y-%m-%d", nticks=10)
+    st.plotly_chart(fig, use_container_width=True)
+
 if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market Wizard")    
     st.header('🌍 CK Market Wizard')
-    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))    
+    
+    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩','💸종베'))    
     date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
     class_data = Dataselect(date,st.secrets["server"],st.secrets["database"],st.secrets["username"],st.secrets["password"])
     db_connection = class_data.init_db()
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
+
+    st.divider()
     # Using object notation
     with st.sidebar:
-
         st.header("🆕 Data Batch Status")
         
         # 데이터 처리 상태 가져오기
@@ -91,28 +105,123 @@ if __name__ == "__main__":
         dm_date_b1 = class_data.getDataProcess('b1')
         
         # 데이터 처리 상태 출력
-        st.write(f'🏠 국내데이터 {dm_date_a1} 완료')
-        st.write(f'🌐 해외데이터 {dm_date_b1} 완료')
+        st.success(f'🏠 국내데이터 {dm_date_a1} 완료')
+        st.info(f'🌐 해외데이터 {dm_date_b1} 완료')
         
         # 최신 뉴스와 업데이트 입력 필드
-        
-        st.header("📰 업데이트 내역")
+        st.header("📰 Recently Update")
         st.markdown('''
-            - (시장분석)투자자예탁금, 신용공여 추가
-            - (옵션분석)옵션지표 설명글 추가
-            - (트레이딩)트레이딩 설명글 추가
-            - (주식분석)뉴스 요약 추가
+            - 투자자예탁금, 신용공여 데이터 업데이트
+            - 옵션지표 설명글 추가
+            - 트레이딩 설명글 추가
+            - 뉴스 요약 추가
         ''')
-                
+        
         # 연락처 섹션
         st.header("📞 Contact")
-        st.write("📧 For support, contact me via email: chansoookim@naver.com ")
+        st.write("📧 For support, contact me via email: [chansoookim@naver.com](mailto:chansoookim@naver.com)")
+
+        # 추가적인 스타일링 요소
+        st.markdown("---")
+        st.write("Thank you for using our service!")
+        st.markdown("""
+            <style>
+            .sidebar .sidebar-content {
+                background-color: #f0f2f6;
+                padding: 20px;
+                border-radius: 10px;
+            }
+            .sidebar .sidebar-content h1, .sidebar .sidebar-content h2, .sidebar .sidebar-content h3 {
+                color: #4CAF50;
+            }
+            .sidebar .sidebar-content p, .sidebar .sidebar-content li {
+                font-size: 14px;
+            }
+            </style>
+            """, unsafe_allow_html=True)
     
     
+    if date and add_selectbox=="💸종베":
+        st.header('📈 매수종목 분석')
+        trading_list = class_data.getTradinglist(date,2)
+        selected_stock = st.selectbox('🔎 종목 선택', trading_list['stockcode'])
+        trading_df = class_data.gettradinginfo(date,1)
+        st.dataframe(trading_df,hide_index=True)
+        df = class_data.getthemestock(date, selected_stock, 2)
+        df_aftermarket = class_data.getAftermarketprice(date, selected_stock, 4)
+
+        df_all = pd.concat([df, df_aftermarket], axis=1)
+        df_lastnews = class_data.getLastnews(selected_stock)
+        df_gongsi = class_data.getstockgongsi(date, selected_stock)
+        st.dataframe(df_all, use_container_width=True,hide_index=True)
+        
+        st.markdown("""
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+        """, unsafe_allow_html=True)
+        html_table = generate_table(df_gongsi,'종목공시')
+        st.markdown(html_table, unsafe_allow_html=True)
+        
+    
+        st.markdown("""
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+        """, unsafe_allow_html=True)
+        html_table = generate_table(df_lastnews,'종목뉴스')
+        st.markdown(html_table, unsafe_allow_html=True)
+            
+
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            df_price = class_data.getstockprice(date, selected_stock, 'M')
+            
+            df_price['datetime'] =pd.to_datetime(df_price['datetime'])
+            fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart', 'date', 'price')
+            # 차트를 Streamlit에 표시합니다.
+            st.plotly_chart(fig_m, use_container_width=True)
+        
+        with col2:
+            df_price = class_data.getstockprice(date, selected_stock, 'D')
+            df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
+            fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title="Daily Price Trends")
+            fig_d.update_layout(autosize=True)
+            st.plotly_chart(fig_d, use_container_width=True)
+
+
+        frdate = class_data.getCalendar(date,'m',6)
+        col4, col5, col6 = st.columns(3) 
+        df = class_data.gettradinginfo(frdate,3)
+        df_st1 = df[df['strategy']=='jongbe_new'][['logdate','ret']]
+        df_st1['cumret'] = (1 + df_st1['ret']).cumprod()
+        df_st2 = df[df['strategy']=='jongbe_new2'][['logdate','ret']]
+        df_st2['cumret'] = (1 + df_st2['ret']).cumprod()
+        df_st3 = df[df['strategy']=='jongbe_new3'][['logdate','ret']]
+        df_st3['cumret'] = (1 + df_st3['ret']).cumprod()
+        with st.container():          
+            with col4:
+                # st.markdown('**strategy1**')
+                df_st1['logdate'] = pd.to_datetime(df_st1['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
+                fig = px.line(df_st1,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 1 Cumulative Return')
+                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col5:
+                # st.markdown('**strategy2**')
+                df_st2['logdate'] = pd.to_datetime(df_st2['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
+                fig = px.line(df_st2,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 2 Cumulative Return')
+                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
+                st.plotly_chart(fig, use_container_width=True)
+                
+            with col6:
+                # st.markdown('**strategy3**')
+                df_st3['logdate'] = pd.to_datetime(df_st3['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
+                fig = px.line(df_st3,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 3 Cumulative Return')
+                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
+                st.plotly_chart(fig, use_container_width=True)
+                
     if date and add_selectbox=="🌟대시보드":
         st.header('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
-        st.write('국내',date,'해외 : ',os_date)
+        st.write('국내데이터 : ',date,' 해외 데이터 : ',os_date)
         st.divider()
         with st.container():
             # cols = responsive_columns()
@@ -122,7 +231,7 @@ if __name__ == "__main__":
                 ('KOSPI', 7, 'U001'), ('KOSDAQ', 7, 'U201'), ('S&P500', 8, 'SPX'), ('NASDAQ', 8, 'COMP'),
                 ('한국 원', 9, 'FX@KRW'), ('금($/온스)', 9, 'CM@NGLD'), ('미국채권, 9, 10-Year(CBT)', 9, '99948'), ('WTI, 원유 뉴욕근월', 9, 'CM@PWTI')
             ]
-        
+
             for label, flag, code in markets:
                 if label in ['KOSPI', 'KOSDAQ']:
                     price, delta = class_data.getCurrentPrice(date, flag, code)
@@ -132,6 +241,7 @@ if __name__ == "__main__":
                 with cols[idx % len(cols)]:
                     st.metric(label=label, value=price, delta=delta)
                 idx += 1
+
 
 
         st.divider()
@@ -317,7 +427,7 @@ if __name__ == "__main__":
                             row=2, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrLndrKosdaq'], mode='lines', name='신용거래대주 코스닥'),
                             row=2, col=1)
-                fig.update_layout(title_text='신용공여추이', autosize=True, height=600,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
+                fig.update_layout(title_text='신용공여잔고추이', autosize=True, height=600,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
                 st.plotly_chart(fig, use_container_width=True)
 
                 
@@ -328,7 +438,6 @@ if __name__ == "__main__":
                                     subplot_titles=('투자자 예탁금', '미수금','반대매매','반대매매비중'))
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['invrDpsgAmt'], mode='lines', name='투자자 예탁금'),
                             row=1, col=1)
-                
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['brkTrdUcolMny'], mode='lines', name='위탁매매 미수금'),
                             row=2, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['brkTrdUcolMnyVsOppsTrdAmt'], mode='lines', name='미수금 대비 반대매매 금액'),
@@ -471,78 +580,75 @@ if __name__ == "__main__":
         st.header('📈트레이딩 지수')
         st.write('조회일 : ',date)
         term, termflag = class_data.select_term_and_flag(options=('1일','1주','1개월','2개월','3개월','6개월','1년'))
-    
-        col1, col2 = st.columns(2)
 
+        col1, col2 = st.columns(2)
         with col1:
-            with st.expander('KOSPI누적장중수익률'):
+            with st.expander('오버나잇 전략'):
                 st.write('''
-                **KOSPI 누적 장중 수익률 전략 설명:**
-                - 코스피 지수의 (종가 - 시가) / 시가 를 누적하는 전략입니다.
-                - 매일 장 시작 시의 시가와 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
-                - 이를 시가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
-                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                **오버나잇 수익률 전략 설명:**
+                - 코스피 및 코스닥 지수의 (시가 - 전일 종가) / 전일 종가 를 누적하는 전략입니다.
+                - 오버나잇 수익률은 시장이 폐장된 후, 다음날 개장 시까지의 주가 변동을 포착하는데, 이는 장 마감 후 발생하는 뉴스나 글로벌 시장의 움직임 등에 의해 영향을 받습니다.
+                - 이러한 전략은 단기적인 변동성을 이용하며, 장 마감 후 긍정적인 뉴스나 글로벌 호재에 반응하는 주가 상승을 노리는 것입니다.
                 ''')
-            plot_backtest(date, 2, termflag, term, 'U001', 'KOSPI 누적 장중 수익률')
+
+            plot_backtest_multiple(date, 1, termflag, term, {'U001': 'KOSPI 누적 오버나잇 수익률', 'U201': 'KOSDAQ 누적 오버나잇 수익률'})
 
         with col2:
-
-            with st.expander('KOSPI누적오버나잇수익률'):
+            with st.expander('장중모멘텀'):
                 st.write('''
-                **KOSPI 누적 오버나잇 수익률 전략 설명:**
-                - 코스피 지수의 (시가 - 전일 종가) / 전일 종가 를 누적하는 전략입니다.
-                - 매일 장 시작 시의 시가와 전일 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
-                - 이를 전일 종가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
-                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                **장중 모멘텀 전략 설명:**
+                - 장초반 30분 수익률이 상승하면 장종료 30분 전에 매수합니다.
+                - 매수 후 당일 종가에 포지션을 청산합니다.
+                - 이 전략은 장중 초기의 모멘텀이 하루 종가까지 지속될 가능성을 활용합니다.
+                - 초기의 상승 모멘텀은 종종 지속적인 매수 압력으로 이어질 수 있습니다.
                 ''')
-            plot_backtest(date, 1, termflag, term, 'U001', 'KOSPI 누적 오버나잇 수익률')
 
+            plot_backtest_multiple(date, 6, termflag, term, {'U001': 'KOSPI 장중 모멘텀', 'U201': 'KOSDAQ 장중 모멘텀'})
         col3, col4 = st.columns(2)
         with col3:
-
-            with st.expander('KOSDAQ누적장중수익률'):
+            with st.expander('변동성돌파'):
                 st.write('''
-                **KOSDAQ 누적 장중 수익률 전략 설명:**
-                - 코스닥 지수의 (종가 - 시가) / 시가 를 누적하는 전략입니다.
-                - 매일 장 시작 시의 시가와 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
-                - 이를 시가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
-                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                **Volatility Breakout 전략 설명:**
+                - 당일 가격이 당일 시가 + (전일 고가 - 전일 저가) * 0.5 보다 높으면 매수 신호를 발생시킵니다.
+                - 매수 후 당일 종가에 포지션을 청산합니다.
+                - 이 전략은 시장의 단기적인 변동성을 이용하여 수익을 창출하는 것을 목표로 합니다.
+                - 변동성이 높은 날에는 가격이 급격히 움직일 가능성이 크기 때문에 이러한 돌파 지점을 이용하여 수익을 얻을 수 있습니다.
                 ''')
-            plot_backtest(date, 2, termflag, term, 'U201', 'KOSDAQ 누적 장중 수익률')
+
+            plot_backtest_multiple(date, 5, termflag, term, {'U001': 'KOSPI 변동성돌파', 'U201': 'KOSDAQ 변동성돌파'})
         with col4:
-
-            with st.expander('KOSDAQ누적오버나잇수익률'):
+            with st.expander('일중 주기성 모멘텀 전략'):
                 st.write('''
-                **KOSDAQ 누적 오버나잇 수익률 전략 설명:**
-                - 코스닥 지수의 (시가 - 전일 종가) / 전일 종가 를 누적하는 전략입니다.
-                - 매일 장 시작 시의 시가와 전일 장 마감 시의 종가를 비교하여 그 차이를 계산합니다.
-                - 이를 전일 종가로 나눈 후 백분율로 변환하여 일일 수익률을 구합니다.
-                - 이렇게 구한 일일 수익률을 누적하여 전체 기간 동안의 수익률 변화를 추적합니다.
+                **Intraday Periodicity Momentum 전략 설명:**
+                - 전일 장 마지막 20분이 상승했으면, 당일 마지막 20분에 진입, 종가 청산합니다.
+                - 이 전략은 전일의 상승 모멘텀이 당일 장 마감 전에도 지속될 가능성을 이용합니다.
+                - 전일 마지막 20분 동안의 상승이 다음날에도 긍정적인 심리를 유발할 수 있습니다.
                 ''')
-            plot_backtest(date, 1, termflag, term, 'U201', 'KOSDAQ 누적 오버나잇 수익률')
 
-
+            plot_backtest_multiple(date, 7, termflag, term, {'U001': 'KOSPI 일중주기성 모멘텀', 'U201': 'KOSDAQ 일중주기성 모멘텀'})
         col5, col6 = st.columns(2)
         with col5:
-
-            with st.expander('코스피 변동성돌파'):
+            with st.expander('일중 주기성 리버설 전략'):
                 st.write('''
-                **KOSPI Volatility Breakout 전략 설명:**
-                - 코스피 지수의 변동성 돌파 전략입니다.
-                - 당일 가격이 당일 시가 + (전일 고가 - 전일 저가) * 0.5 보다 높으면 매수 신호를 발생시킵니다.
-                - 매수 후 당일 종가에 포지션을 청산합니다.
+                **Intraday Periodicity Reversal 전략 설명:**
+                - 전일 장 초반 10분이 하락했으면, 당일 장시가 진입 10분에 청산합니다.
+                - 이 전략은 전일 장 초반의 하락 모멘텀이 당일 장 초반의 반등으로 이어질 가능성을 이용합니다.
+                - 전일 초반의 하락이 과매도로 인한 반등을 유발할 수 있습니다.
                 ''')
-            plot_backtest(date, 5, termflag, term, 'U001', 'KOSPI Volatility Breakout')
+
+            plot_backtest_multiple(date, 8, termflag, term, {'U001': 'KOSPI 일중주기성 리버설', 'U201': 'KOSDAQ 일중주기성 리버설'})
+
         with col6:
-
-            with st.expander('코스닥 변동성돌파'):
+            with st.expander('월요 리버설 전략'):
                 st.write('''
-                **KOSDAQ Volatility Breakout 전략 설명:**
-                - 코스닥 지수의 변동성 돌파 전략입니다.
-                - 당일 가격이 당일 시가 + (전일 고가 - 전일 저가) * 0.5 보다 높으면 매수 신호를 발생시킵니다.
-                - 매수 후 당일 종가에 포지션을 청산합니다.
+                **Monday Reversal 전략 설명:**
+                - 월요일 오후 수익률이 0보다 작으면 매수하고, 다음 주 월요일 시가에 매도합니다.
+                - 월요일 오전 손실로 인해 오후에 더 많은 위험을 감수하게 되어 주가가 하락할 수 있습니다.
+                - 오전에는 주말 뉴스로 인해 과민반응이 발생하고, 오후에는 진정되어 주가가 하락할 수 있습니다.
+                - 주중 나머지 기간 동안 시장이 안정화되면서 주가가 상승합니다.
                 ''')
-            plot_backtest(date, 5, termflag, term, 'U201', 'KOSDAQ Volatility Breakout')
+
+            plot_backtest_multiple(date, 9, termflag, term, {'U001': 'KOSPI 월요 리버설', 'U201': 'KOSDAQ 월요 리버설'})
 
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
@@ -557,7 +663,7 @@ if __name__ == "__main__":
                 - 양합은 행사가가 같은 콜옵션과 풋옵션의 합 중 가장 낮은 합을 말합니다.
                 - 옵션 프리미엄이 높아지면 양합도 높아집니다.
                 ''')
-            plot_backtest(date, 3, termflag, term, '0', 'K200옵션등가 양합')
+            plot_backtest_single(date, 3, termflag, term, '0', 'K200옵션등가 양합')
 
         with col6:
 
@@ -568,7 +674,7 @@ if __name__ == "__main__":
                 - 비율 > 1: 시장 참가자들이 주로 풋 옵션을 매수하고 있음을 의미하며, 이는 시장의 하락에 대한 대비가 더 많음을 나타낼 수 있습니다.
                 - 비율 < 1: 시장 참가자들이 주로 콜 옵션을 매수하고 있음을 의미하며, 이는 시장의 상승에 대한 기대가 더 많음을 나타낼 수 있습니다.
                 ''')
-            plot_backtest(date, 4, termflag, term, '0', '등가 Put-Call 거래량 비율')
+            plot_backtest_single(date, 4, termflag, term, '0', '등가 Put-Call 거래량 비율')
 
                     
         option_metrics = {
