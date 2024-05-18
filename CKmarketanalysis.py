@@ -579,16 +579,17 @@ if __name__ == "__main__":
     if date and add_selectbox=="🔖트레이딩":
         st.header('📈트레이딩 지수')
         st.write('조회일 : ',date)
-        term, termflag = class_data.select_term_and_flag(options=('1일','1주','1개월','2개월','3개월','6개월','1년'))
+        term, termflag = class_data.select_term_and_flag(options=('1일','1주','1개월','2개월','3개월','6개월','1년'),default_index=6)
 
         col1, col2 = st.columns(2)
         with col1:
-            with st.expander('오버나잇 전략'):
+            with st.expander('오버나잇 퍼즐'):
                 st.write('''
                 **오버나잇 수익률 전략 설명:**
                 - 코스피 및 코스닥 지수의 (시가 - 전일 종가) / 전일 종가 를 누적하는 전략입니다.
                 - 오버나잇 수익률은 시장이 폐장된 후, 다음날 개장 시까지의 주가 변동을 포착하는데, 이는 장 마감 후 발생하는 뉴스나 글로벌 시장의 움직임 등에 의해 영향을 받습니다.
                 - 이러한 전략은 단기적인 변동성을 이용하며, 장 마감 후 긍정적인 뉴스나 글로벌 호재에 반응하는 주가 상승을 노리는 것입니다.
+                - https://doi.org/10.5392/JKCA.2022.22.11.537
                 ''')
 
             plot_backtest_multiple(date, 1, termflag, term, {'U001': 'KOSPI 누적 오버나잇 수익률', 'U201': 'KOSDAQ 누적 오버나잇 수익률'})
@@ -597,12 +598,13 @@ if __name__ == "__main__":
             with st.expander('장중모멘텀'):
                 st.write('''
                 **장중 모멘텀 전략 설명:**
-                - 장초반 30분 수익률이 상승하면 장종료 30분 전에 매수합니다.
+                - 장초반 수익률이 상승하면 장종료 전에 매수합니다.
                 - 매수 후 당일 종가에 포지션을 청산합니다.
                 - 이 전략은 장중 초기의 모멘텀이 하루 종가까지 지속될 가능성을 활용합니다.
                 - 초기의 상승 모멘텀은 종종 지속적인 매수 압력으로 이어질 수 있습니다.
+                - https://doi.org/10.1016/j.jfineco.2018.05.009
                 ''')
-
+                
             plot_backtest_multiple(date, 6, termflag, term, {'U001': 'KOSPI 장중 모멘텀', 'U201': 'KOSDAQ 장중 모멘텀'})
         col3, col4 = st.columns(2)
         with col3:
@@ -617,36 +619,39 @@ if __name__ == "__main__":
 
             plot_backtest_multiple(date, 5, termflag, term, {'U001': 'KOSPI 변동성돌파', 'U201': 'KOSDAQ 변동성돌파'})
         with col4:
-            with st.expander('일중 주기성 모멘텀 전략'):
+            with st.expander('일중 주기성 모멘텀'):
                 st.write('''
                 **Intraday Periodicity Momentum 전략 설명:**
-                - 전일 장 마지막 20분이 상승했으면, 당일 마지막 20분에 진입, 종가 청산합니다.
+                - 전일 장 마지막 구간에 상승했으면, 당일 마지막 구간에 진입, 종가 청산합니다.
                 - 이 전략은 전일의 상승 모멘텀이 당일 장 마감 전에도 지속될 가능성을 이용합니다.
-                - 전일 마지막 20분 동안의 상승이 다음날에도 긍정적인 심리를 유발할 수 있습니다.
+                - http://uci.or.kr/G704-SER000001453.2012.12.3.007
                 ''')
 
             plot_backtest_multiple(date, 7, termflag, term, {'U001': 'KOSPI 일중주기성 모멘텀', 'U201': 'KOSDAQ 일중주기성 모멘텀'})
         col5, col6 = st.columns(2)
         with col5:
-            with st.expander('일중 주기성 리버설 전략'):
+            with st.expander('일중 주기성 리버설'):
                 st.write('''
                 **Intraday Periodicity Reversal 전략 설명:**
-                - 전일 장 초반 10분이 하락했으면, 당일 장시가 진입 10분에 청산합니다.
+                - 전일 장 초반 하락했으면, 당일 장시가 진입, 조기 청산합니다.
                 - 이 전략은 전일 장 초반의 하락 모멘텀이 당일 장 초반의 반등으로 이어질 가능성을 이용합니다.
                 - 전일 초반의 하락이 과매도로 인한 반등을 유발할 수 있습니다.
+                - https://doi.org/10.5762/KAIS.2022.23.7.344
                 ''')
 
             plot_backtest_multiple(date, 8, termflag, term, {'U001': 'KOSPI 일중주기성 리버설', 'U201': 'KOSDAQ 일중주기성 리버설'})
 
         with col6:
-            with st.expander('월요 리버설 전략'):
+            with st.expander('월요 리버설'):
                 st.write('''
                 **Monday Reversal 전략 설명:**
-                - 월요일 오후 수익률이 0보다 작으면 매수하고, 다음 주 월요일 시가에 매도합니다.
+                - 월요일 오후 수익률과 반대로 진입합니다.
                 - 월요일 오전 손실로 인해 오후에 더 많은 위험을 감수하게 되어 주가가 하락할 수 있습니다.
                 - 오전에는 주말 뉴스로 인해 과민반응이 발생하고, 오후에는 진정되어 주가가 하락할 수 있습니다.
                 - 주중 나머지 기간 동안 시장이 안정화되면서 주가가 상승합니다.
+                - https://doi.org/10.1016/j.frl.2024.105525
                 ''')
+            
 
             plot_backtest_multiple(date, 9, termflag, term, {'U001': 'KOSPI 월요 리버설', 'U201': 'KOSDAQ 월요 리버설'})
 
