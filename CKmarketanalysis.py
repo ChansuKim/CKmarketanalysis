@@ -120,7 +120,7 @@ if __name__ == "__main__":
         # 연락처 섹션
         st.header("📞 Contact")
         st.write("📧 email: [chansoookim@naver.com](mailto:chansoookim@naver.com)")
-        st.write("📝 blog : https://blog.naver.com/chansoookim")
+        st.write("📝 blog : [https://blog.naver.com/chansoookim]")
 
         # 추가적인 스타일링 요소
         st.markdown("---")
