@@ -21,8 +21,6 @@ class Dataselect():
     
     # @st.cache_resource
     def init_db(self):
-        
-        
         connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
@@ -346,7 +344,7 @@ class Dataselect():
             autosize=True,
             xaxis=dict(
                 tickmode='auto',
-                nticks=20,
+                nticks=10,
                 tickformat=tick_format
             )
         )
@@ -367,7 +365,7 @@ class Dataselect():
             autosize=True,
             xaxis=dict(
                     tickmode='auto',  # 자동 또는 사용자 지정 간격으로 레이블을 조정합니다.
-                    nticks=20,  # x축에 표시할 레이블의 최대 수를 설정합니다.
+                    nticks=10,  # x축에 표시할 레이블의 최대 수를 설정합니다.
                     tickformat=tick_format  # '01-Jan' 형식의 날짜 형식을 사용합니다.
                 )
                  )   

@@ -67,10 +67,9 @@ def plot_backtest_single(date,flag, termflag, term,code, title):
     df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
     fig_d = px.line(df_price, x='logdate', y='ret', title=title)
     fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
-    # x축의 날짜 개수를 더 많이 나오도록 설정
     fig_d.update_xaxes(
         tickformat="%Y-%m-%d",
-        nticks=10  # 날짜 개수를 반 정도로 설정
+        nticks=10  
     )
     st.plotly_chart(fig_d, use_container_width=True)
 
@@ -90,7 +89,7 @@ if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market Wizard")    
     st.header('🌍 CK Market Wizard')
     
-    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩'))   
+    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩','💸종베'))    
     date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
     class_data = Dataselect(date,st.secrets["server"],st.secrets["database"],st.secrets["username"],st.secrets["password"])
     db_connection = class_data.init_db()
@@ -114,10 +113,8 @@ if __name__ == "__main__":
         # 최신 뉴스와 업데이트 입력 필드
         st.header("📰 Recently Update")
         st.markdown('''
-            - 투자자예탁금, 신용공여 데이터 업데이트
-            - 옵션지표 설명글 추가
-            - 트레이딩 설명글 추가
-            - 뉴스 요약 추가
+            - 투자전략 추가
+            - TOP Bottom 탭 추가
         ''')
         
         # 연락처 섹션
@@ -143,7 +140,7 @@ if __name__ == "__main__":
             </style>
             """, unsafe_allow_html=True)
     
-                
+                  
     if date and add_selectbox=="🌟대시보드":
         st.header('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
@@ -170,7 +167,7 @@ if __name__ == "__main__":
 
 
 
-        st.divider()
+
         col1, col2 = st.columns(2)
         with st.container():      
             with col1:
@@ -181,6 +178,7 @@ if __name__ == "__main__":
                 st.markdown('**상품**')
                 df = class_data.marketcondition(os_date,3)
                 st.dataframe(df , use_container_width=True,hide_index=True)
+
         col3, col4 = st.columns(2)
         with st.container():      
             with col3:
@@ -191,39 +189,53 @@ if __name__ == "__main__":
                 st.markdown('**채권**')
                 df = class_data.marketcondition(os_date,5)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-        col5, col6 = st.columns(2)
-        with st.container():      
-            with col5:
+
+
+
+        tab1, tab2 = st.tabs(['top','bottom'])
+        with tab1:
                 st.markdown('**코스피 주간 Top 10**')
                 df = class_data.marketcondition(date,6)
                 st.dataframe(df , use_container_width=True,hide_index=True)
+        with tab2:
+                st.markdown('**코스피 주간 Bottom 10**')
+                df = class_data.marketcondition(date,14)
+                st.dataframe(df , use_container_width=True,hide_index=True)
 
-            with col6:
+        tab3, tab4 = st.tabs(['top','bottom'])
+        with tab3:
                 st.markdown('**코스닥 주간 Top 10**')
                 df = class_data.marketcondition(date,7)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-
-        col7, col8 = st.columns(2)
-        with st.container():      
-            with col5:
+        with tab4:
+                st.markdown('**코스닥 주간 Bottom 10**')
+                df = class_data.marketcondition(date,15)
+                st.dataframe(df , use_container_width=True,hide_index=True)
+        tab5, tab6 = st.tabs(['top','bottom'])
+        with tab5:
                 st.markdown('**코넥스 주간 Top 10**')
                 df = class_data.marketcondition(date,9)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-
-            with col6:
+        with tab6:
+                st.markdown('**코넥스 주간 Bottm 10**')
+                df = class_data.marketcondition(date,16)
+                st.dataframe(df , use_container_width=True,hide_index=True)
+        tab7, tab8 = st.tabs(['top','bottom'])
+        with tab7:
                 st.markdown('**K-OTC 주간 Top 10**')
                 df = class_data.marketcondition(date,10)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-
-        col9, col10 = st.columns(2)
-        with st.container():      
-            with col9:
+        with tab8:
+                st.markdown('**K-OTC 주간 Bottm 10**')
+                df = class_data.marketcondition(date,17)
+                st.dataframe(df , use_container_width=True,hide_index=True)
+        tab9, tab10 = st.tabs(['top','bottom'])
+        with tab9:
                 st.markdown('**ETF 주간 Top 10**')
                 df = class_data.marketcondition(date,8)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-
-            with col10:
-                st.markdown('**ETF 주간 Bottom 10**')
+        with tab10:
+                st.markdown('**ETF 주간 Top 10**')
                 df = class_data.marketcondition(date,13)
                 st.dataframe(df , use_container_width=True,hide_index=True)
 
@@ -309,19 +321,19 @@ if __name__ == "__main__":
                 df_kospi = class_data.getindex_fundmental(date,'KOSPI',termflag,term)
                 df_kospi['logdate'] = pd.to_datetime(df_kospi['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_kospi, x='logdate', y='per', labels={'price': 'Price (Daily)'}, title="KOSPI PER")
-                fig_d.update_layout(autosize=True)
+                fig_d.update_layout(autosize=True,xaxis=dict(tickmode='auto',nticks=10,tickformat='%Y-%m-%d'))
                 st.plotly_chart(fig_d, use_container_width=True)
                 fig_d = px.line(df_kospi, x='logdate', y='pbr', labels={'price': 'Price (Daily)'}, title="KOSPI PBR")
-                fig_d.update_layout(autosize=True)
+                fig_d.update_layout(autosize=True,xaxis=dict(tickmode='auto',nticks=10,tickformat='%Y-%m-%d'))
                 st.plotly_chart(fig_d, use_container_width=True)
             with col8:
                 df_kosdaq = class_data.getindex_fundmental(date,'KOSDAQ',termflag,term)
                 df_kosdaq['logdate'] = pd.to_datetime(df_kosdaq['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_kosdaq, x='logdate', y='per', labels={'price': 'Price (Daily)'}, title="KOSDAQ PER")
-                fig_d.update_layout(autosize=True)
+                fig_d.update_layout(autosize=True,xaxis=dict(tickmode='auto',nticks=10,tickformat='%Y-%m-%d'))
                 st.plotly_chart(fig_d, use_container_width=True)  
                 fig_d = px.line(df_kosdaq, x='logdate', y='pbr', labels={'price': 'Price (Daily)'}, title="KOSDAQ PBR")
-                fig_d.update_layout(autosize=True)
+                fig_d.update_layout(autosize=True,xaxis=dict(tickmode='auto',nticks=10,tickformat='%Y-%m-%d'))
                 st.plotly_chart(fig_d, use_container_width=True) 
 
             col11,col12 = st.columns(2)
@@ -329,19 +341,21 @@ if __name__ == "__main__":
                 df_price = class_data.getindexprice_sugup(date, 'u001','D',termflag,term)
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSPI_수급추이")
-                fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
+                fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-1, xanchor="center", x=0.5)
+                                    ,xaxis=dict(tickmode='auto',nticks=10,tickformat='%Y-%m-%d'))
                 st.plotly_chart(fig_d, use_container_width=True)
             with col12:
                 df_price = class_data.getindexprice_sugup(date, 'u201','D',termflag,term)
                 df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_price, x='logdate', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Daily KOSDAQ_수급추이")
-                fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
+                fig_d.update_layout(autosize=True,legend=dict(orientation="h", yanchor="bottom", y=-1, xanchor="center", x=0.5)
+                                    ,xaxis=dict(tickmode='auto',nticks=10,tickformat='%Y-%m-%d'))
                 st.plotly_chart(fig_d, use_container_width=True)
 
             col13,col14 = st.columns(2)
             with col13:
                 df_price = class_data.getmarketinfo(date,termflag,term,10)
-                df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
+                df_price['logdate'] = pd.to_datetime(df_price['logdate'])
                 # 서브플롯 생성
                 fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.1,
                                     subplot_titles=('신용거래 융자', '신용거래 대주'))
@@ -353,13 +367,14 @@ if __name__ == "__main__":
                             row=2, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['crdTrLndrKosdaq'], mode='lines', name='신용거래대주 코스닥'),
                             row=2, col=1)
+                fig.update_xaxes(tickformat='%Y-%m-%d')
                 fig.update_layout(title_text='신용공여잔고추이', autosize=True, height=600,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
                 st.plotly_chart(fig, use_container_width=True)
 
                 
             with col14:
                 df_price = class_data.getmarketinfo(date,termflag,term,11)
-                df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
+                df_price['logdate'] = pd.to_datetime(df_price['logdate'])
                 fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.1,
                                     subplot_titles=('투자자 예탁금', '미수금','반대매매','반대매매비중'))
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['invrDpsgAmt'], mode='lines', name='투자자 예탁금'),
@@ -370,6 +385,7 @@ if __name__ == "__main__":
                             row=3, col=1)
                 fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['ucolMnyVsOppsTrdRlImpt'], mode='lines', name='반대매매/미수금'),
                             row=4, col=1)
+                fig.update_xaxes(tickformat='%Y-%m-%d')
                 fig.update_layout(title_text='증시자금추이', autosize=True, height=600,legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5))
                 st.plotly_chart(fig, use_container_width=True)
 
@@ -391,6 +407,7 @@ if __name__ == "__main__":
                 
                 df_price['datetime'] = pd.to_datetime(df_price['datetime'])  # Ensure datetime is in the correct format
                 fig_d = px.line(df_price, x='datetime', y=df_price.columns, labels={'price': 'Price (Daily)'}, title="Intraday KOSPI_sugup Trends")
+                
                 fig_d.update_layout(autosize=True)
                 st.plotly_chart(fig_d, use_container_width=True)
             with col4:
@@ -474,6 +491,10 @@ if __name__ == "__main__":
                     df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
                     fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title='Daily Price Trends(From a month ago to '+str(chartdate)+')')
                     fig_d.update_layout(autosize=True)
+                    fig_d.update_xaxes(
+                        tickformat="%Y-%m-%d",
+                        nticks=10  
+                    )
                     st.plotly_chart(fig_d, use_container_width=True)
 
                 # st.dataframe(df_gongsi)
@@ -505,7 +526,7 @@ if __name__ == "__main__":
     if date and add_selectbox=="🔖트레이딩":
         st.header('📈트레이딩 지수')
         st.write('조회일 : ',date)
-        term, termflag = class_data.select_term_and_flag(options=('1일','1주','1개월','2개월','3개월','6개월','1년'),default_index=6)
+        term, termflag = class_data.select_term_and_flag(options=('1일','1주','1개월','2개월','3개월','6개월','1년','2년','3년'),default_index=6)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -518,7 +539,7 @@ if __name__ == "__main__":
                 - https://doi.org/10.5392/JKCA.2022.22.11.537
                 ''')
 
-            plot_backtest_multiple(date, 1, termflag, term, {'U001': 'KOSPI 누적 오버나잇 수익률', 'U201': 'KOSDAQ 누적 오버나잇 수익률'})
+            plot_backtest_multiple(date, 1, termflag, term, {'U001': 'KOSPI 오버나잇 수익률', 'U201': 'KOSDAQ 오버나잇 수익률'})
 
         with col2:
             with st.expander('장중모멘텀'):
@@ -590,7 +611,14 @@ if __name__ == "__main__":
                 - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4416622
                 ''')
             plot_backtest_multiple(date, 10, termflag, term, {'U001': 'KOSPI ORB', 'U201': 'KOSDAQ ORB'})
-
+        # with col8:
+        #     with st.expander('TORB'):
+        #         st.write('''
+        #         **Timely Open Range Breakout (TORB) 전략 설명:**
+                
+        #         - https://ieeexplore.ieee.org/document/8641124
+        #         ''')
+        #     plot_backtest_multiple(date, 11, termflag, term, {'U001': 'KOSPI ORB', 'U201': 'KOSDAQ ORB'})
 
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
