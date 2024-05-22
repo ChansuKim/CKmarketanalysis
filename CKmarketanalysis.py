@@ -113,8 +113,10 @@ if __name__ == "__main__":
         # 최신 뉴스와 업데이트 입력 필드
         st.header("📰 Recently Update")
         st.markdown('''
-            - 투자전략 추가
-            - TOP Bottom 탭 추가
+            - 투자자예탁금, 신용공여 데이터 업데이트
+            - 옵션지표 설명글 추가
+            - 트레이딩 설명글 추가
+            - 뉴스 요약 추가
         ''')
         
         # 연락처 섹션
@@ -140,7 +142,7 @@ if __name__ == "__main__":
             </style>
             """, unsafe_allow_html=True)
     
-                  
+                
     if date and add_selectbox=="🌟대시보드":
         st.header('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
@@ -192,7 +194,7 @@ if __name__ == "__main__":
 
 
 
-        tab1, tab2 = st.tabs(['top','bottom'])
+        tab1, tab2 = st.tabs(['🔝 상위','🔻하위'])
         with tab1:
                 st.markdown('**코스피 주간 Top 10**')
                 df = class_data.marketcondition(date,6)
@@ -201,8 +203,7 @@ if __name__ == "__main__":
                 st.markdown('**코스피 주간 Bottom 10**')
                 df = class_data.marketcondition(date,14)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-
-        tab3, tab4 = st.tabs(['top','bottom'])
+        tab3, tab4 = st.tabs(['🔝 상위','🔻하위'])
         with tab3:
                 st.markdown('**코스닥 주간 Top 10**')
                 df = class_data.marketcondition(date,7)
@@ -211,7 +212,16 @@ if __name__ == "__main__":
                 st.markdown('**코스닥 주간 Bottom 10**')
                 df = class_data.marketcondition(date,15)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-        tab5, tab6 = st.tabs(['top','bottom'])
+        tab9, tab10 = st.tabs(['🔝 상위','🔻하위'])
+        with tab9:
+                st.markdown('**ETF 주간 Top 10**')
+                df = class_data.marketcondition(date,8)
+                st.dataframe(df , use_container_width=True,hide_index=True)
+        with tab10:
+                st.markdown('**ETF 주간 Bottom 10**')
+                df = class_data.marketcondition(date,13)
+                st.dataframe(df , use_container_width=True,hide_index=True)
+        tab5, tab6 = st.tabs(['🔝 상위','🔻하위'])
         with tab5:
                 st.markdown('**코넥스 주간 Top 10**')
                 df = class_data.marketcondition(date,9)
@@ -220,23 +230,14 @@ if __name__ == "__main__":
                 st.markdown('**코넥스 주간 Bottm 10**')
                 df = class_data.marketcondition(date,16)
                 st.dataframe(df , use_container_width=True,hide_index=True)
-        tab7, tab8 = st.tabs(['top','bottom'])
+        tab7, tab8 = st.tabs(['🔝 상위','🔻하위'])
         with tab7:
                 st.markdown('**K-OTC 주간 Top 10**')
                 df = class_data.marketcondition(date,10)
                 st.dataframe(df , use_container_width=True,hide_index=True)
         with tab8:
-                st.markdown('**K-OTC 주간 Bottm 10**')
+                st.markdown('**K-OTC 주간 Bottom 10**')
                 df = class_data.marketcondition(date,17)
-                st.dataframe(df , use_container_width=True,hide_index=True)
-        tab9, tab10 = st.tabs(['top','bottom'])
-        with tab9:
-                st.markdown('**ETF 주간 Top 10**')
-                df = class_data.marketcondition(date,8)
-                st.dataframe(df , use_container_width=True,hide_index=True)
-        with tab10:
-                st.markdown('**ETF 주간 Top 10**')
-                df = class_data.marketcondition(date,13)
                 st.dataframe(df , use_container_width=True,hide_index=True)
 
 
@@ -611,14 +612,15 @@ if __name__ == "__main__":
                 - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4416622
                 ''')
             plot_backtest_multiple(date, 10, termflag, term, {'U001': 'KOSPI ORB', 'U201': 'KOSDAQ ORB'})
-        # with col8:
-        #     with st.expander('TORB'):
-        #         st.write('''
-        #         **Timely Open Range Breakout (TORB) 전략 설명:**
-                
-        #         - https://ieeexplore.ieee.org/document/8641124
-        #         ''')
-        #     plot_backtest_multiple(date, 11, termflag, term, {'U001': 'KOSPI ORB', 'U201': 'KOSDAQ ORB'})
+        with col8:
+            with st.expander('VWAP Trend'):
+                st.write('''
+                **VWAP Trend 전략 설명:**
+                - 첫5분 을 제외하고, 1분봉의 Vwap을 계산후, 현재가가 vwap가격보다 0.3% 높으면 매수, 낮으면 매도합니다.
+                - 청산은 종가에 합니다.
+                - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351
+                ''')
+            plot_backtest_multiple(date, 12, termflag, term, {'U001': 'KOSPI ORB', 'U201': 'KOSDAQ ORB'})
 
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
