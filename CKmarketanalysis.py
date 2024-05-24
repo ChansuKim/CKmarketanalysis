@@ -619,7 +619,16 @@ if __name__ == "__main__":
                 - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351
                 ''')
             plot_backtest_multiple(date, 12, termflag, term, {'U001': 'KOSPI VWAP Trend', 'U201': 'KOSDAQ VWAP Trend'})
-
+        col9, col10 = st.columns(2)
+        with col9:
+            with st.expander('OS strategy'):
+                st.write('''
+                **OS ratio strategy 전략 설명:**
+                - Option대비 Stock 거래량 비율을 이용한 전략 입니다.
+                - 콜 개별주식옵션 거래대금 / 개별주식 거래대금을 소팅합니다.
+                - 종가에 이 비율이 높은 상위 10%는 롱, 낮은 10%는 숏 하고, 다음 날 종가에 엑싯합니다.
+                ''')
+            plot_backtest_multiple(date, 13, termflag, term, {'U001': 'OS Portfolio'})
 
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
