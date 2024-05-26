@@ -114,6 +114,7 @@ if __name__ == "__main__":
         st.header("📰 Recently Update")
         st.markdown('''
             - 투자전략추가(VWAP)
+            - 투자전략추가(Timing Momentum)
         ''')
         st.markdown("---")
         # 연락처 섹션
@@ -629,6 +630,16 @@ if __name__ == "__main__":
                 - 종가에 이 비율이 높은 상위 10%는 롱, 낮은 10%는 숏 하고, 다음 날 종가에 엑싯합니다.
                 ''')
             plot_backtest_multiple(date, 13, termflag, term, {'U001': 'OS Portfolio'})
+        with col10:
+            with st.expander('Timing Momentum strategy'):
+                st.write('''
+                **Timing Momentum strategy 전략 설명:**
+                - 전월 12개월 수익률이 높은 상위 10% 주식은 승자 포트폴리오로, 하위 10% 주식은 패자 포트폴리오로 분류합니다.
+                - 3주 수익률 신호를 활용하여 승자 포트폴리오와 패자 포트폴리오의 적절한 매수 및 매도 시점을 결정합니다.
+                - 승자 포트폴리오내 종목의 3주 수익률이 0보다 높으면 해당 종목을 매수합니다.
+                - 패자 포트폴리오의 종목의 3주 수익률이 0보다 낮으면 해당 종목을 매도합니다
+                 ''')
+            plot_backtest_multiple(date, 14, termflag, term, {'1': 'Timing momentum','2': 'momentum'})
 
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
