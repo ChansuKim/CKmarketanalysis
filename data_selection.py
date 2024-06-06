@@ -232,7 +232,12 @@ class Dataselect():
                 EXEC [SL_GetInformation] ?,?,?,?,?
                 '''
             params = (todate,6, '', '','')
-        
+        elif flag==3:
+            sql = '''
+                EXEC [SL_GetInformation] ?,?,?,?,?
+                '''
+            params = (todate,13, '', '','')
+            
         df = pd.read_sql(sql, con=self.db_init, params=params)
         return str(df['date'][0]).replace('-','')
     
