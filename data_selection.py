@@ -8,6 +8,7 @@ import streamlit as st
 import plotly.express as px
 
 
+
 showErrorDetails = False
 
 class Dataselect():
