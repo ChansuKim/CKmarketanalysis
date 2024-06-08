@@ -6,6 +6,7 @@ from datetime import datetime
 import re
 
 
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 # from sqlalchemy.util._collections import LRUCache
@@ -52,6 +53,7 @@ def generate_table(dataframe, tablename):
 
 
 
+@st.cache_data
 def get_maxdate(todate):
     maxdate = class_data.getmaxdate(todate,1)
     if int(todate)>=int(maxdate):
@@ -113,12 +115,11 @@ if __name__ == "__main__":
         st.header("📰 Recently Update")
         st.markdown('''
             - 투자전략추가(VWAP)
-            - 투자전략추가(Timing Momentum)
         ''')
         st.markdown("---")
         # 연락처 섹션
         st.header("📞 Contact")
-        st.write("📧 Email : chansoookim@naver.com")
+        st.write("📧 chansoookim@naver.com")
         st.markdown("🔗 [LinkedIn](https://www.linkedin.com/in/chansoookim)")
         st.markdown("📝 [Blog](https://blog.naver.com/chansoookim)")
         # 추가적인 스타일링 요소
@@ -139,6 +140,8 @@ if __name__ == "__main__":
             }
             </style>
             """, unsafe_allow_html=True)
+    
+    
     if date and add_selectbox=="💸매수종목분석":
         st.header('📈 매수종목 분석')
         date = class_data.getmaxdate(date,3)
@@ -147,7 +150,7 @@ if __name__ == "__main__":
         trading_df = class_data.gettradinginfo(date,1)
         # st.dataframe(trading_df,hide_index=True)
         df = class_data.getthemestock(date, selected_stock, 2)
-        df_aftermarket = class_data.getAftermarketprice(date, selected_stock, 4)
+        df_aftermarket = class_data.getAftermarketprice(date, selected_stock,4)
 
         df_all = pd.concat([df, df_aftermarket], axis=1)
         df_lastnews = class_data.getLastnews(selected_stock)
@@ -379,11 +382,13 @@ if __name__ == "__main__":
             col5, col6 = st.columns(2)
 
             with col5:
+                
                 df_price = class_data.getindexprice(date, 'u001', 'D',termflag,term)
                 df_price['logdate'] =pd.to_datetime(df_price['logdate'])
                 fig_m = class_data.create_candlestick_chart(df_price, 'Daily KOSPI Candestick Chart', 'date', 'price')
                 st.plotly_chart(fig_m, use_container_width=True)
             with col6:
+                
                 df_price = class_data.getindexprice(date, 'u201', 'D',termflag,term)
                 df_price['logdate'] =pd.to_datetime(df_price['logdate'])
                 fig_m = class_data.create_candlestick_chart(df_price, 'Intraday KOSDAQ Candestick Chart', 'date', 'price')
@@ -695,6 +700,7 @@ if __name__ == "__main__":
                 - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351
                 ''')
             plot_backtest_multiple(date, 12, termflag, term, {'U001': 'KOSPI VWAP Trend', 'U201': 'KOSDAQ VWAP Trend'})
+        
         col9, col10 = st.columns(2)
         with col9:
             with st.expander('OS strategy'):
@@ -715,6 +721,8 @@ if __name__ == "__main__":
                 - 패자 포트폴리오의 종목의 3주 수익률이 0보다 낮으면 해당 종목을 매도합니다
                  ''')
             plot_backtest_multiple(date, 14, termflag, term, {'1': 'Timing momentum','2': 'momentum'})
+
+
 
     if date and add_selectbox=="💹옵션분석":
         st.write('조회일 : ',date)
