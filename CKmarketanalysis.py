@@ -4,6 +4,8 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 import re
+import numpy as np
+
 
 
 import plotly.graph_objects as go
@@ -50,6 +52,25 @@ def generate_table(dataframe, tablename):
 
 
 
+# MDD 계산 함수
+def calculate_mdd(cumret):
+    drawdown = cumret / cumret.cummax()-1
+    mdd = drawdown.min()
+    return mdd
+
+# 샤프비율 계산 함수
+# def calculate_sharpe_ratio(returns, risk_free_rate=0.0):
+#     mean_return = returns.mean()
+#     std_return = returns.std()
+#     sharpe_ratio = (mean_return - risk_free_rate) / std_return
+#     return sharpe_ratio
+
+def calculate_sharpe_ratio(returns, risk_free_rate=0.0):
+    mean_return = returns.mean() * 250
+    std_return = returns.std() * np.sqrt(250)
+    sharpe_ratio = (mean_return - risk_free_rate) / std_return
+    return sharpe_ratio
+
 
 
 @st.cache_data
@@ -89,7 +110,7 @@ if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market Wizard")    
     st.header('🌍 CK Market Wizard')
     
-    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩','💸매수종목분석'))    
+    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩','💸Systemtrading'))    
     date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
     class_data = Dataselect(date,st.secrets["server"],st.secrets["database"],st.secrets["username"],st.secrets["password"])
     db_connection = class_data.init_db()
@@ -113,7 +134,7 @@ if __name__ == "__main__":
         # 최신 뉴스와 업데이트 입력 필드
         st.header("📰 Recently Update")
         st.markdown('''
-            - 투자전략추가(VWAP)
+            - 캐싱작업 추가
         ''')
         st.markdown("---")
         # 연락처 섹션
@@ -139,86 +160,113 @@ if __name__ == "__main__":
             }
             </style>
             """, unsafe_allow_html=True)
-    
-    
-    if date and add_selectbox=="💸매수종목분석":
-        st.header('📈 매수종목 분석')
+
+    if date and add_selectbox=="💸Systemtrading":
+        st.header('📈 시스템트레이딩 성과')  
+
+        # 데이터 불러오기 및 누적 수익률 계산
+        frdate = class_data.getCalendar(date, 'm', 6)
+        df = class_data.gettradinginfo(frdate, 3)
+
+        strategies = {
+            'jongbe_new': 'Strategy 1',
+            'jongbe_new2': 'Strategy 2',
+            'jongbe_new3': 'Strategy 3'
+        }
+
+        # 전략 선택 옵션
+        selected_strategy_key = st.selectbox('전략 선택', list(strategies.keys()), format_func=lambda x: strategies[x])
+        selected_strategy_title = strategies[selected_strategy_key]
+
+        # 데이터 필터링 및 지표 계산
+        df_st = df[df['strategy'] == selected_strategy_key][['logdate', 'ret']]
+        df_st['cumret'] = (1 + df_st['ret']).cumprod()
+
+        # 주요 지표 계산
+        cumret = df_st['cumret']
+        mdd = calculate_mdd(cumret)
+        sharpe_ratio = calculate_sharpe_ratio(df_st['ret'])
+        cumret = df_st['cumret']-1
+
+        col1,col2,col3 = st.columns(3)
+        with col1:
+            st.metric(label=f"누적수익률", value=f"{cumret.iloc[-1]:.2%}")
+        with col2:
+            st.metric(label=f"MDD", value=f"{mdd:.2%}")
+        with col3:
+            st.metric(label=f"샤프비율", value=f"{sharpe_ratio:.2f}")
+
+       
+        # 그래프 그리기
+        df_st['logdate'] = pd.to_datetime(df_st['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=df_st['logdate'], y=df_st['cumret'], mode='lines', name='Cumulative Return',
+                                 line=dict(color='royalblue', width=2)))
+        fig.update_layout(
+            title=f'<b>Cumulative Return</b>',
+            xaxis_title='Date',
+            yaxis_title='Cumulative Return',
+            xaxis=dict(tickmode='auto', nticks=10, tickformat='%Y-%m-%d'),
+            template='plotly_white',
+            title_font_size=20,
+            title_x=0.5,
+            title_y=0.95,
+            margin=dict(l=20, r=20, t=60, b=20),
+            plot_bgcolor='rgba(0,0,0,0)',  # Remove background color
+            paper_bgcolor='rgba(0,0,0,0)'  # Remove background color
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+
+        
         date = class_data.getmaxdate(date,3)
         trading_list = class_data.getTradinglist(date,2)
-        selected_stock = st.selectbox('🔎 종목 선택', trading_list['stockcode'])
-        trading_df = class_data.gettradinginfo(date,1)
-        # st.dataframe(trading_df,hide_index=True)
-        df = class_data.getthemestock(date, selected_stock, 2)
-        df_aftermarket = class_data.getAftermarketprice(date, selected_stock,4)
+        trading_list_strategy = trading_list[trading_list['strategy'] == selected_strategy_key]
+        if len(trading_list_strategy)>0:
+            st.header('📈 매수종목 분석')
+            selected_stock = st.selectbox('🔎 종목 선택', trading_list_strategy['stockcode'])
+            trading_df = class_data.gettradinginfo(date,1)
+            # st.dataframe(trading_df,hide_index=True)
+            df = class_data.getthemestock(date, selected_stock, 2)
+            df_aftermarket = class_data.getAftermarketprice(date, selected_stock,4)
 
-        df_all = pd.concat([df, df_aftermarket], axis=1)
-        df_lastnews = class_data.getLastnews(selected_stock)
-        df_gongsi = class_data.getstockgongsi(date, selected_stock)
-        st.dataframe(df_all, use_container_width=True,hide_index=True)
-        
-        st.markdown("""
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-        """, unsafe_allow_html=True)
-        html_table = generate_table(df_gongsi,'종목공시')
-        st.markdown(html_table, unsafe_allow_html=True)
-        
-    
-        st.markdown("""
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-        """, unsafe_allow_html=True)
-        html_table = generate_table(df_lastnews,'종목뉴스')
-        st.markdown(html_table, unsafe_allow_html=True)
+            df_all = pd.concat([df, df_aftermarket], axis=1)
+            df_lastnews = class_data.getLastnews(selected_stock)
+            df_gongsi = class_data.getstockgongsi(date, selected_stock)
+            st.dataframe(df_all, use_container_width=True,hide_index=True)
             
-
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            df_price = class_data.getstockprice(date, selected_stock, 'M')
+            st.markdown("""
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+            """, unsafe_allow_html=True)
+            html_table = generate_table(df_gongsi,'종목공시')
+            st.markdown(html_table, unsafe_allow_html=True)
             
-            df_price['datetime'] =pd.to_datetime(df_price['datetime'])
-            fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart', 'date', 'price')
-            # 차트를 Streamlit에 표시합니다.
-            st.plotly_chart(fig_m, use_container_width=True)
         
-        with col2:
-            df_price = class_data.getstockprice(date, selected_stock, 'D')
-            df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
-            fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title="Daily Price Trends")
-            fig_d.update_layout(autosize=True)
-            st.plotly_chart(fig_d, use_container_width=True)
-
-
-        frdate = class_data.getCalendar(date,'m',6)
-        col4, col5, col6 = st.columns(3) 
-        df = class_data.gettradinginfo(frdate,3)
-        df_st1 = df[df['strategy']=='jongbe_new'][['logdate','ret']]
-        df_st1['cumret'] = (1 + df_st1['ret']).cumprod()
-        df_st2 = df[df['strategy']=='jongbe_new2'][['logdate','ret']]
-        df_st2['cumret'] = (1 + df_st2['ret']).cumprod()
-        df_st3 = df[df['strategy']=='jongbe_new3'][['logdate','ret']]
-        df_st3['cumret'] = (1 + df_st3['ret']).cumprod()
-        with st.container():          
-            with col4:
-                # st.markdown('**strategy1**')
-                df_st1['logdate'] = pd.to_datetime(df_st1['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
-                fig = px.line(df_st1,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 1 Cumulative Return')
-                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
-                st.plotly_chart(fig, use_container_width=True)
-
-            with col5:
-                # st.markdown('**strategy2**')
-                df_st2['logdate'] = pd.to_datetime(df_st2['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
-                fig = px.line(df_st2,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 2 Cumulative Return')
-                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
-                st.plotly_chart(fig, use_container_width=True)
+            st.markdown("""
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+            """, unsafe_allow_html=True)
+            html_table = generate_table(df_lastnews,'종목뉴스')
+            st.markdown(html_table, unsafe_allow_html=True)
                 
-            with col6:
-                # st.markdown('**strategy3**')
-                df_st3['logdate'] = pd.to_datetime(df_st3['logdate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
-                fig = px.line(df_st3,x='logdate', y='cumret', labels={'cumret': 'Cumulative Return'}, title='Strategy 3 Cumulative Return')
-                fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Return', xaxis=dict(tickmode='auto',nticks=10,tickformat = '%Y-%m-%d'))
-                st.plotly_chart(fig, use_container_width=True)
+
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                df_price = class_data.getstockprice(date, selected_stock, 'M')
                 
+                df_price['datetime'] =pd.to_datetime(df_price['datetime'])
+                fig_m = class_data.create_candlestick_chart(df_price, 'Intraday Candestick Chart', 'date', 'price')
+                # 차트를 Streamlit에 표시합니다.
+                st.plotly_chart(fig_m, use_container_width=True)
+            
+            with col2:
+                df_price = class_data.getstockprice(date, selected_stock, 'D')
+                df_price['logdate'] = pd.to_datetime(df_price['logdate'])  # Ensure datetime is in the correct format
+                fig_d = px.line(df_price, x='logdate', y='close', labels={'price': 'Price (Daily)'}, title="Daily Price Trends")
+                fig_d.update_layout(autosize=True)
+                st.plotly_chart(fig_d, use_container_width=True)
+
     if date and add_selectbox=="🌟대시보드":
         st.header('🌟DASH BOARD')
         os_date = class_data.getmaxdate(todate,2)
