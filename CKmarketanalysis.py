@@ -134,7 +134,7 @@ if __name__ == "__main__":
         # 최신 뉴스와 업데이트 입력 필드
         st.header("📰 Recently Update")
         st.markdown('''
-            - 캐싱작업 추가
+            - System trading(Live) 추가
         ''')
         st.markdown("---")
         # 연락처 섹션
