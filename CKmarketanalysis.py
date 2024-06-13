@@ -110,7 +110,7 @@ if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market Wizard")    
     st.header('🌍 CK Market Wizard')
     
-    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩','💸Systemtrading'))    
+    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩전략','💸Systemtrading(live)'))    
     date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
     class_data = Dataselect(date,st.secrets["server"],st.secrets["database"],st.secrets["username"],st.secrets["password"])
     db_connection = class_data.init_db()
@@ -161,8 +161,8 @@ if __name__ == "__main__":
             </style>
             """, unsafe_allow_html=True)
 
-    if date and add_selectbox=="💸Systemtrading":
-        st.header('📈 시스템트레이딩 성과')  
+    if date and add_selectbox=="💸Systemtrading(live)":
+        st.header('📈 시스템트레이딩 실매매 성과')  
 
         # 데이터 불러오기 및 누적 수익률 계산
         frdate = class_data.getCalendar(date, 'm', 6)
@@ -650,8 +650,8 @@ if __name__ == "__main__":
         except Exception as e:
             st.write('해당되는 종목이 없습니다.',e)
 
-    if date and add_selectbox=="🔖트레이딩":
-        st.header('📈트레이딩 지수')
+    if date and add_selectbox=="🔖트레이딩전략":
+        st.header('📈트레이딩 전략')
         st.write('조회일 : ',date)
         term, termflag = class_data.select_term_and_flag(options=('1일','1주','1개월','2개월','3개월','6개월','1년','2년','3년'),default_index=6)
 
