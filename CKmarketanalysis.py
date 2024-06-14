@@ -165,7 +165,8 @@ if __name__ == "__main__":
         st.header('📈 시스템트레이딩 실매매 성과')  
 
         # 데이터 불러오기 및 누적 수익률 계산
-        frdate = class_data.getCalendar(date, 'm', 6)
+        # frdate = class_data.getCalendar(date, 'm', 6)
+        frdate = 20230101 #23년부터 추적하도록
         df = class_data.gettradinginfo(frdate, 3)
 
         strategies = {
