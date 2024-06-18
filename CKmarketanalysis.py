@@ -746,7 +746,7 @@ if __name__ == "__main__":
                 - 1분봉의 VWAP을 계산후 장시작 5분후부터, 현재가가 VWAP가격보다 0.3% 높으면 매수, 낮으면 매도, 종가청산합니다.
                 - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351
                 ''')
-            plot_backtest_multiple(date, 12, termflag, term, {'U001': 'KOSPI VWAP Trend', 'U201': 'KOSDAQ VWAP Trend'})
+            # plot_backtest_multiple(date, 12, termflag, term, {'U001': 'KOSPI VWAP Trend', 'U201': 'KOSDAQ VWAP Trend'})
         
         col9, col10 = st.columns(2)
         with col9:
