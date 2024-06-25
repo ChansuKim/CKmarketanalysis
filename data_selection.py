@@ -74,6 +74,13 @@ class Dataselect():
             df.drop(['logdate', 'logtime'], axis=1, inplace=True)
 
         return df
+    @st.cache_data  #데이터 가져오는 것에는 data
+    def getNaverdiscussion(_self,code):
+        # todate = int(str(date).replace('-',''))
+        sql ="EXEC [SL_Getstockreturn] ?,?,?,?"
+        params = ('','', code, int(12))
+        df = pd.read_sql(sql, con=_self.db_init,params=params)
+        return df
     
     @st.cache_data  #데이터 가져오는 것에는 data
     def getstockgongsi(_self,date,code):
