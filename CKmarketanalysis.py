@@ -5,11 +5,15 @@ import plotly.express as px
 from datetime import datetime
 import re
 import numpy as np
-
-
+import quantstats as qs
+import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
 # from sqlalchemy.util._collections import LRUCache
+import streamlit.components.v1 as components
+
+
 def generate_table(dataframe, tablename):
     title = f"<h5>{tablename}</h5>"
     table_style = """
@@ -30,6 +34,13 @@ def generate_table(dataframe, tablename):
         4: '😀',
         5: '😍'
     }
+    def replace_emojis(text):
+        # 감성점수 매핑
+        def replace_match(match):
+            score = int(match.group(1))
+            return f'감성점수 : {score} {emoji_map.get(score, "")}'
+        
+        return re.sub(r'감성점수\s*:\s*(\d)', replace_match, text)
     
     for _, row in dataframe.iterrows():
         row_html = []
@@ -42,6 +53,10 @@ def generate_table(dataframe, tablename):
             elif col == 'sentiment score':
                 emoji = emoji_map.get(value, '')
                 cell_html = f'<td class="center">{value} {emoji}</td>'
+            elif col == 'Discussion analysis':
+                # formatted_value = value.replace('-', '<br>-')
+                formatted_value = replace_emojis(value.replace('-', '<br>-'))
+                cell_html = f'<td class="left">{formatted_value}</td>'
             else:
                 cell_html = f'<td>{value}</td>'
             row_html.append(cell_html)
@@ -71,7 +86,6 @@ def calculate_sharpe_ratio(returns, risk_free_rate=0.0):
     return sharpe_ratio
 
 
-
 @st.cache_data
 def get_maxdate(todate):
     maxdate = class_data.getmaxdate(todate,1)
@@ -93,11 +107,14 @@ def plot_backtest_single(date,flag, termflag, term,code, title):
     )
     st.plotly_chart(fig_d, use_container_width=True)
 
+
 def plot_backtest_multiple(date, flag, termflag, term, codes):
     fig = go.Figure()
     
     for code, label in codes.items():
         df_price = class_data.getBacktest(date, flag, termflag, term, code)
+        df_price = df_price.dropna()
+        # print(flag,df_price)
         df_price['logdate'] = pd.to_datetime(df_price['logdate'], format='%Y%m%d')
         fig.add_trace(go.Scatter(x=df_price['logdate'], y=df_price['ret'], mode='lines', name=label))
     
@@ -109,13 +126,15 @@ if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="CK Market Wizard")    
     st.header('🌍 CK Market Wizard')
     
-    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩전략','💸Systemtrading(live)'))    
+    add_selectbox = st.selectbox("🔍 찾고 싶은 정보를 선택하세요.", ("🌟대시보드","📈시장분석","🎭테마수익률","📊주식분석",'💹옵션분석','🔖트레이딩전략','💸Systemtrading(Live)'))    
     date = st.date_input("📅 조회 시작일을 선택해 주세요",max_value=datetime.today())
     class_data = Dataselect(date,st.secrets["server"],st.secrets["database"],st.secrets["username"],st.secrets["password"])
     db_connection = class_data.init_db()
     todate = str(date).replace('-','')
     date = get_maxdate(todate)
 
+    # print('asdfsadfsdfsf',class_data.getBacktest('20240617',12,'m',12,'U201'))
+    # print(class_data.getBacktest('20240617',12,'m',12,'U001'))
 
     st.divider()
 
@@ -133,7 +152,7 @@ if __name__ == "__main__":
         # 최신 뉴스와 업데이트 입력 필드
         st.header("📰 Recently Update")
         st.markdown('''
-            - System trading(Live) 추가
+            - 캐싱작업 추가
         ''')
         st.markdown("---")
         # 연락처 섹션
@@ -160,14 +179,16 @@ if __name__ == "__main__":
             </style>
             """, unsafe_allow_html=True)
 
-    if date and add_selectbox=="💸Systemtrading(live)":
+    if date and add_selectbox=="💸Systemtrading(Live)":
         st.header('📈 시스템트레이딩 실매매 성과')  
 
         # 데이터 불러오기 및 누적 수익률 계산
         # frdate = class_data.getCalendar(date, 'm', 6)
-        frdate = 20230101 #23년부터 추적하도록
+        frdate=20230102
         df = class_data.gettradinginfo(frdate, 3)
 
+
+        
         strategies = {
             'jongbe_new': 'Strategy 1',
             'jongbe_new2': 'Strategy 2',
@@ -180,13 +201,31 @@ if __name__ == "__main__":
 
         # 데이터 필터링 및 지표 계산
         df_st = df[df['strategy'] == selected_strategy_key][['logdate', 'ret']]
+        
         df_st['cumret'] = (1 + df_st['ret']).cumprod()
+
+        # 'logdate'를 인덱스로 설정
+
+        
+        # df_st['logdate'] = pd.to_datetime(df_st['logdate'], format='%Y%m%d')
+        # df_st.set_index('logdate', inplace=True)
+        # # 누적 수익률 계산
+        # returns = df_st['ret']
+        # qs.reports.html(returns, output='basic_report.html')
+        # # Streamlit에 HTML 파일 표시
+        # with open('basic_report.html', 'r', encoding='utf-8') as f:
+        #     report_html = f.read()
+        #     st.components.v1.html(report_html, height=700, scrolling=True)
+
+
 
         # 주요 지표 계산
         cumret = df_st['cumret']
         mdd = calculate_mdd(cumret)
         sharpe_ratio = calculate_sharpe_ratio(df_st['ret'])
         cumret = df_st['cumret']-1
+
+
 
         col1,col2,col3 = st.columns(3)
         with col1:
@@ -234,20 +273,31 @@ if __name__ == "__main__":
             df_all = pd.concat([df, df_aftermarket], axis=1)
             df_lastnews = class_data.getLastnews(selected_stock)
             df_gongsi = class_data.getstockgongsi(date, selected_stock)
+            df_naverdiscussion = class_data.getNaverdiscussion(selected_stock)
             st.dataframe(df_all, use_container_width=True,hide_index=True)
             
             st.markdown("""
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
             """, unsafe_allow_html=True)
-            html_table = generate_table(df_gongsi,'종목공시')
-            st.markdown(html_table, unsafe_allow_html=True)
-            
-        
-            st.markdown("""
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-            """, unsafe_allow_html=True)
             html_table = generate_table(df_lastnews,'종목뉴스')
             st.markdown(html_table, unsafe_allow_html=True)
+
+            
+        
+            col4,col5 = st.columns(2)
+            with col4:
+                st.markdown("""
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                """, unsafe_allow_html=True)
+                html_table = generate_table(df_gongsi,'종목공시')
+                st.markdown(html_table, unsafe_allow_html=True)
+
+            with col5:
+                st.markdown("""
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                """, unsafe_allow_html=True)
+                html_table = generate_table(df_naverdiscussion,'종목토론')
+                st.markdown(html_table, unsafe_allow_html=True)
                 
 
             col1, col2 = st.columns(2)
