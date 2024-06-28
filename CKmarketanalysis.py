@@ -156,7 +156,7 @@ if __name__ == "__main__":
         st.markdown("---")
         # 연락처 섹션
         st.header("📞 Contact")
-        st.write("📧 chansoookim@naver.com")
+        st.write("📧 chansooo.kim@gmail.com")
         st.markdown("🔗 [LinkedIn](https://www.linkedin.com/in/chansoookim)")
         st.markdown("📝 [Blog](https://blog.naver.com/chansoookim)")
         # 추가적인 스타일링 요소
@@ -275,11 +275,6 @@ if __name__ == "__main__":
             df_naverdiscussion = class_data.getNaverdiscussion(selected_stock)
             st.dataframe(df_all, use_container_width=True,hide_index=True)
             
-            st.markdown("""
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-            """, unsafe_allow_html=True)
-            html_table = generate_table(df_lastnews,'종목뉴스')
-            st.markdown(html_table, unsafe_allow_html=True)
 
             
         
@@ -297,7 +292,14 @@ if __name__ == "__main__":
                 """, unsafe_allow_html=True)
                 html_table = generate_table(df_naverdiscussion,'종목토론')
                 st.markdown(html_table, unsafe_allow_html=True)
-                
+
+            st.markdown("""
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+            """, unsafe_allow_html=True)
+            html_table = generate_table(df_lastnews,'종목뉴스')
+            st.markdown(html_table, unsafe_allow_html=True)
+
+            
 
             col1, col2 = st.columns(2)
             
