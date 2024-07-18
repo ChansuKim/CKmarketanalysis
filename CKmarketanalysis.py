@@ -277,7 +277,7 @@ if __name__ == "__main__":
             
 
             
-        
+
             col4,col5 = st.columns(2)
             with col4:
                 st.markdown("""
