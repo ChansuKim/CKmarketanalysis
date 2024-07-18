@@ -675,25 +675,39 @@ if __name__ == "__main__":
                     )
                     st.plotly_chart(fig_d, use_container_width=True)
 
-                # st.dataframe(df_gongsi)
-
                 df_lastnews = class_data.getLastnews(selected_stock)
                 df_gongsi = class_data.getstockgongsi(date, selected_stock)
-                # st.dataframe(df_all, use_container_width=True,hide_index=True)
-                # col9,col10 = st.columns(2)
-                # with col9:
-                
-                st.markdown("""
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-                """, unsafe_allow_html=True)
-                html_table = generate_table(df_lastnews,'종목뉴스')
+                df_naverdiscussion = class_data.getNaverdiscussion(selected_stock)
+    
+                st.markdown(
+                    """
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                    """,
+                    unsafe_allow_html=True,
+                )
+                html_table = generate_table(df_lastnews, "종목뉴스")
                 st.markdown(html_table, unsafe_allow_html=True)
-                
-                st.markdown("""
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-                """, unsafe_allow_html=True)
-                html_table = generate_table(df_gongsi,'종목공시')
-                st.markdown(html_table, unsafe_allow_html=True)
+    
+                col4, col5 = st.columns(2)
+                with col4:
+                    st.markdown(
+                        """
+                            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                    html_table = generate_table(df_gongsi, "종목공시")
+                    st.markdown(html_table, unsafe_allow_html=True)
+    
+                with col5:
+                    st.markdown(
+                        """
+                            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                    html_table = generate_table(df_naverdiscussion, "종목토론")
+                    st.markdown(html_table, unsafe_allow_html=True)
                     
                 # with col10:
 
