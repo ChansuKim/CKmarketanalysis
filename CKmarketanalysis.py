@@ -679,14 +679,7 @@ if __name__ == "__main__":
                 df_gongsi = class_data.getstockgongsi(date, selected_stock)
                 df_naverdiscussion = class_data.getNaverdiscussion(selected_stock)
     
-                st.markdown(
-                    """
-                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-                    """,
-                    unsafe_allow_html=True,
-                )
-                html_table = generate_table(df_lastnews, "종목뉴스")
-                st.markdown(html_table, unsafe_allow_html=True)
+
     
                 col4, col5 = st.columns(2)
                 with col4:
@@ -709,8 +702,14 @@ if __name__ == "__main__":
                     html_table = generate_table(df_naverdiscussion, "종목토론")
                     st.markdown(html_table, unsafe_allow_html=True)
                     
-                # with col10:
-
+                st.markdown(
+                    """
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                    """,
+                    unsafe_allow_html=True,
+                )
+                html_table = generate_table(df_lastnews, "종목뉴스")
+                st.markdown(html_table, unsafe_allow_html=True)
 
         except Exception as e:
             st.write('해당되는 종목이 없습니다.',e)
