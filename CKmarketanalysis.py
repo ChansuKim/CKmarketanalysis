@@ -47,8 +47,8 @@ def generate_table(dataframe, tablename):
             if col == 'URL':
                 cell_html = f'<td><a href="{value}" target="_blank"><i class="fas fa-link"></i></a></td>'
             elif col == 'summary':
-                formatted_value = re.sub(r'^-|(?!^)-', '<br>-', value).replace('<br>', '', 1)
-                cell_html = f'<td title="{value}">{formatted_value}</td>'
+                formatted_value = value.replace("- ", "<br>-")
+                cell_html = f'<td title="news">{formatted_value}</td>'
             elif col == 'sentiment score':
                 emoji = emoji_map.get(value, '')
                 cell_html = f'<td class="center">{value} {emoji}</td>'
