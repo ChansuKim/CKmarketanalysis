@@ -10,7 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-
 # from sqlalchemy.util._collections import LRUCache
 import streamlit.components.v1 as components
 
