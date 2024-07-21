@@ -7,7 +7,6 @@ import plotly.express as px
 from datetime import datetime
 import re
 import numpy as np
-import quantstats as qs
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
