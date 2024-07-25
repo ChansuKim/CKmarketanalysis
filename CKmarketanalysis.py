@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
 # from sqlalchemy.util._collections import LRUCache
 import streamlit.components.v1 as components
 
@@ -190,9 +191,8 @@ if __name__ == "__main__":
         st.header("📰 Recently Update")
         st.markdown(
             """
-            - 종토방 감성분석 추가
-            - 유상증자 분석 추가
-            """
+            - 종토방분석 업데이트
+        """
         )
         st.markdown("---")
         # 연락처 섹션
@@ -324,16 +324,6 @@ if __name__ == "__main__":
             df_gongsi = class_data.getstockgongsi(date, selected_stock)
             df_naverdiscussion = class_data.getNaverdiscussion(selected_stock)
             st.dataframe(df_all, use_container_width=True, hide_index=True)
-
-            st.markdown(
-                """
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-            """,
-                unsafe_allow_html=True,
-            )
-            html_table = generate_table(df_lastnews, "종목뉴스")
-            st.markdown(html_table, unsafe_allow_html=True)
-
             col4, col5 = st.columns(2)
             with col4:
                 st.markdown(
@@ -354,6 +344,15 @@ if __name__ == "__main__":
                 )
                 html_table = generate_table(df_naverdiscussion, "종목토론")
                 st.markdown(html_table, unsafe_allow_html=True)
+
+            st.markdown(
+                """
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+            """,
+                unsafe_allow_html=True,
+            )
+            html_table = generate_table(df_lastnews, "종목뉴스")
+            st.markdown(html_table, unsafe_allow_html=True)
 
             col1, col2 = st.columns(2)
 
@@ -896,7 +895,7 @@ if __name__ == "__main__":
 
             df = class_data.getthemestock(searchdate, stockcodes, 2)
             st.dataframe(df, use_container_width=True, hide_index=True)
-
+            selected_stock = None
             col3, col4 = st.columns(2)
             with col3:
                 stock_options = {
@@ -906,8 +905,11 @@ if __name__ == "__main__":
                     )
                     for index, row in stock_list.iterrows()
                 }
+                # try:
                 stock_choice = st.selectbox("🔎 종목 선택", list(stock_options.keys()))
                 selected_stock, stockname = stock_options[stock_choice]
+                # except:
+                # print("skip")
 
             df_aftermarket = class_data.getAftermarketprice(
                 searchdate, selected_stock, 4
@@ -983,17 +985,6 @@ if __name__ == "__main__":
             df_lastnews = class_data.getLastnews(selected_stock)
             df_gongsi = class_data.getstockgongsi(date, selected_stock)
             df_naverdiscussion = class_data.getNaverdiscussion(selected_stock)
-
-            st.markdown(
-                """
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-                """,
-                unsafe_allow_html=True,
-            )
-            html_table = generate_table(df_lastnews, "종목뉴스")
-            st.markdown(html_table, unsafe_allow_html=True)
-            # st.dataframe(df_lastnews)
-
             col4, col5 = st.columns(2)
             with col4:
                 st.markdown(
@@ -1015,9 +1006,17 @@ if __name__ == "__main__":
                 html_table = generate_table(df_naverdiscussion, "종목토론")
                 st.markdown(html_table, unsafe_allow_html=True)
                 # st.dataframe(df_naverdiscussion)
+            st.markdown(
+                """
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+                """,
+                unsafe_allow_html=True,
+            )
+            html_table = generate_table(df_lastnews, "종목뉴스")
+            st.markdown(html_table, unsafe_allow_html=True)
 
         except Exception as e:
-            st.write("해당되는 종목이 없습니다.", e)
+            st.write("해당되는 종목이 없습니다.")
 
     if date and add_selectbox == "🔖트레이딩전략":
         st.header("📈트레이딩 전략")
