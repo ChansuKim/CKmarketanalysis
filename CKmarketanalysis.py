@@ -13,8 +13,6 @@ from plotly.subplots import make_subplots
 import squarify
 import matplotlib.font_manager as fm
 
-# 폰트 설정
-
 
 # from sqlalchemy.util._collections import LRUCache
 import streamlit.components.v1 as components
