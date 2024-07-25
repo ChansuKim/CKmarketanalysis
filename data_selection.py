@@ -23,8 +23,8 @@ class Dataselect:
     # @st.cache_resource #연결에는 resource
     def init_db(_self):
 
-        # connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=SQL+Server"
-        connection_string = f"mssql+pyodbc://{self.user_id}:{self.password}@{self.server}/{self.database}?driver=ODBC Driver 17 for SQL Server"
+        
+        connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             _self.db_init = engine.connect()
