@@ -10,9 +10,56 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import squarify
+import matplotlib.font_manager as fm
+
+# 폰트 설정
+
 
 # from sqlalchemy.util._collections import LRUCache
 import streamlit.components.v1 as components
+
+
+def visualize_treemap(df, flag):
+    font_path = "NanumBarunGothic.ttf"
+    fontprop = fm.FontProperties(fname=font_path)
+
+    if flag == 1:
+
+        norm = plt.Normalize(df["수익률(%)"].min(), df["수익률(%)"].max())
+        # 색상 설정
+        colors = plt.cm.RdYlGn(norm(df["수익률(%)"]))
+        df["평균 거래대금"] = (
+            df["평균 거래대금"].str.replace(",", "").astype(float) / 1e12
+        )
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        squarify.plot(
+            sizes=df["평균 거래대금"],
+            label=df["테마명"],
+            color=colors,
+            alpha=0.8,
+            ax=ax,
+            text_kwargs={"fontproperties": fontprop, "fontsize": 5},
+        )
+        plt.axis("off")
+        st.pyplot(fig)
+    if flag == 2:
+        norm = plt.Normalize(df["ret"].min(), df["ret"].max())
+        # 색상 설정
+        colors = plt.cm.RdYlGn(norm(df["ret"]))
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        squarify.plot(
+            sizes=df["mktcap"],
+            label=df["stockname"],
+            color=colors,
+            alpha=0.8,
+            ax=ax,
+            text_kwargs={"fontproperties": fontprop, "fontsize": 5},
+        )
+        plt.axis("off")
+        st.pyplot(fig)
 
 
 def format_text(text):
@@ -152,7 +199,7 @@ if __name__ == "__main__":
         (
             "🌟대시보드",
             "📈시장분석",
-            "🎭테마수익률",
+            "🎭테마분석",
             "📊주식분석",
             "💹옵션분석",
             "🔖트레이딩전략",
@@ -191,7 +238,7 @@ if __name__ == "__main__":
         st.header("📰 Recently Update")
         st.markdown(
             """
-            - 종토방분석 업데이트
+            - 캐싱작업 추가
         """
         )
         st.markdown("---")
@@ -433,6 +480,32 @@ if __name__ == "__main__":
                 df = class_data.marketcondition(os_date, 5)
                 st.dataframe(df, use_container_width=True, hide_index=True)
 
+        st.divider()
+        with st.container():
+            # st.subheader("트리맵")
+
+            col5, col6 = st.columns(2)
+            # with col5:
+            #     df = class_data.getThemetermreturn(date, "D", "1", "7")
+            #     visualize_treemap(df, 1)
+            with col5:
+                st.markdown("**코스피**")
+                df = class_data.getstockreturnbymarketcap(date, "kospi", "13")
+                visualize_treemap(df, 2)
+            with col6:
+                st.markdown("**코스닥**")
+                df = class_data.getstockreturnbymarketcap(date, "kosdaq", "13")
+                visualize_treemap(df, 2)
+            col7, col8 = st.columns(2)
+            with col7:
+                st.markdown("**코넥스**")
+                df = class_data.getstockreturnbymarketcap(date, "konex", "13")
+                visualize_treemap(df, 2)
+            with col8:
+                st.markdown("**K-OTC**")
+                df = class_data.getstockreturnbymarketcap(date, "k-otc", "13")
+                visualize_treemap(df, 2)
+
         tab1, tab2 = st.tabs(["🔝 상위", "🔻하위"])
         with tab1:
             st.markdown("**코스피 주간 Top 10**")
@@ -479,10 +552,11 @@ if __name__ == "__main__":
             df = class_data.marketcondition(date, 17)
             st.dataframe(df, use_container_width=True, hide_index=True)
 
-    if date and add_selectbox == "🎭테마수익률":
+    if date and add_selectbox == "🎭테마분석":
         st.header("📈테마수익률 현황")
         st.write("조회일 : ", date)
         term, termflag = class_data.select_term_and_flag(default_index=2)
+
         st.subheader("종합현황")
         col1, col2 = st.columns(2)
         with st.container():
