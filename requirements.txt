@@ -79,4 +79,4 @@ uritemplate==4.1.1
 urllib3==2.2.1
 watchdog==4.0.0
 zipp==3.18.1
-squarify=0.0.4
+squarify==0.0.4
