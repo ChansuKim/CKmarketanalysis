@@ -617,7 +617,12 @@ if __name__ == "__main__":
             st.line_chart(df_theme_return)
             df_theme_stocks = class_data.getthemestock(date, selected_themecode, 1)
             st.dataframe(df_theme_stocks, use_container_width=True, hide_index=True)
-
+            df = class_data.getstockreturnbymarketcap(date, selected_themecode, "14")
+            col7, col8 = st.columns(2)
+            with st.container():
+                with col7:
+                    visualize_treemap(df, 2)
+    
     if date and add_selectbox == "📈시장분석":
         st.write("조회일 : ", date)
         st.header("📈 국내시장현황")
