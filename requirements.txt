@@ -79,3 +79,4 @@ urllib3==2.2.1
 watchdog==4.0.0
 zipp==3.18.1
 squarify==0.4.4
+seaborn==0.13.2
