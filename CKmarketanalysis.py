@@ -221,8 +221,6 @@ def plot_backtest_multiple_dynamic(date, flag, termflag, term):
 def visualize_heatmap_seasonaliy(data, flag, termflag, term, title, code):
     data = class_data.getBacktest(date, flag, termflag, term, code)
 
-    day_names = {2: "Mon", 3: "Tue", 4: "Wed", 5: "Thurs", 6: "Fri"}
-
     month_names = {
         "01": "January",
         "02": "February",
@@ -240,19 +238,35 @@ def visualize_heatmap_seasonaliy(data, flag, termflag, term, title, code):
 
     # 월 이름 적용
     data["month_name"] = data["month_name"].map(month_names)
-    data["day_name"] = data["day_name"].map(day_names)
+    if flag == 17:
+        day_names = {2: "Mon", 3: "Tue", 4: "Wed", 5: "Thurs", 6: "Fri"}
+        data["day_name"] = data["day_name"].map(day_names)
+        day_order = ["Fri", "Thurs", "Wed", "Tue", "Mon"]
+    if flag == 18:
+        day_names = {1: "Week1", 2: "Week2", 3: "Week3", 4: "Week4", 5: "Week5"}
+        data["day_name"] = data["day_name"].map(day_names)
+        day_order = ["Week1", "Week2", "Week3", "Week4", "Week5"]
 
-    day_order = [
-     "Fri","Thurs", "Wed", "Tue","Mon"
-    ]
-    
-    # 월 이름을 월별 순서로 정렬
     month_order = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ]
-    data["month_name"] = pd.Categorical(data["month_name"], categories=month_order, ordered=True)
-    data["day_name"] = pd.Categorical(data["day_name"], categories=day_order, ordered=True)
+    data["month_name"] = pd.Categorical(
+        data["month_name"], categories=month_order, ordered=True
+    )
+    data["day_name"] = pd.Categorical(
+        data["day_name"], categories=day_order, ordered=True
+    )
 
     # 요일 및 월별 데이터 그룹화 및 평균 계산
     data_grouped = data.groupby(["day_name", "month_name"]).mean().reset_index()
@@ -1189,65 +1203,109 @@ if __name__ == "__main__":
         st.write("조회일 : ", date)
         term, termflag = class_data.select_term_and_flag(
             options=(
-                "1일",
-                "1주",
-                "1개월",
-                "2개월",
-                "3개월",
-                "6개월",
                 "1년",
                 "2년",
                 "3년",
+                "4년",
+                "5년",
             ),
-            default_index=6,
+            default_index=2,
         )
+        with st.container():
+            col1, col2 = st.columns(2)
+            with col1:
+                with st.expander("KOSPI Day of Week Effect - Intraday"):
+                    st.write(
+                        """
 
-        col1, col2 = st.columns(2)
-        with col1:
-            with st.expander("KOSPI Intraday Seasonalilty"):
-                st.write(
                     """
+                    )
 
-                """
+                visualize_heatmap_seasonaliy(
+                    date, 17, termflag, term, "Average_intraday", "U001"
+                )
+            with col2:
+                with st.expander("KOSPI Day of Week Effect - Overnight"):
+                    st.write(
+                        """
+
+                    """
+                    )
+
+                visualize_heatmap_seasonaliy(
+                    date, 17, termflag, term, "Average_overnight", "U001"
+                )
+            col3, col4 = st.columns(2)
+            with col3:
+                with st.expander("KOSDAQ Day of Week Effect - Intraday"):
+                    st.write(
+                        """
+
+                    """
+                    )
+
+                visualize_heatmap_seasonaliy(
+                    date, 17, termflag, term, "Average_intraday", "U201"
+                )
+            with col4:
+                with st.expander("KOSDAQ Day of Week Effect - Overnight"):
+                    st.write(
+                        """
+
+                    """
+                    )
+
+                visualize_heatmap_seasonaliy(
+                    date, 17, termflag, term, "Average_overnight", "U201"
+                )
+        with st.container():
+            col5, col6 = st.columns(2)
+            with col5:
+                with st.expander("KOSPI Week of Month Effect- Intraday"):
+                    st.write(
+                        """
+
+                    """
+                    )
+
+                visualize_heatmap_seasonaliy(
+                    date, 18, termflag, term, "Average_intraday", "U001"
+                )
+            with col6:
+                with st.expander("KOSPI Week of Month Effect- Overnight"):
+                    st.write(
+                        """
+
+                    """
+                    )
+
+                visualize_heatmap_seasonaliy(
+                    date, 18, termflag, term, "Average_overnight", "U001"
+                )
+            col7, col8 = st.columns(2)
+            with col7:
+                with st.expander("KOSDAQ Week of Month Effect- Intraday"):
+                    st.write(
+                        """
+
+                    """
+                    )
+
+                visualize_heatmap_seasonaliy(
+                    date, 18, termflag, term, "Average_intraday", "U201"
+                )
+            with col8:
+                with st.expander("KOSDAQ Week of Month Effect- Overnight"):
+                    st.write(
+                        """
+
+                    """
+                    )
+
+                visualize_heatmap_seasonaliy(
+                    date, 18, termflag, term, "Average_overnight", "U201"
                 )
 
-            visualize_heatmap_seasonaliy(
-                date, 17, termflag, term, "Average_intraday", "U001"
-            )
-        with col2:
-            with st.expander("KOSPI Overnight Seasonalilty"):
-                st.write(
-                    """
-
-                """
-                )
-
-            visualize_heatmap_seasonaliy(
-                date, 17, termflag, term, "Average_overnight", "U001"
-            )
-        col3, col4 = st.columns(2)
-        with col3:
-            with st.expander("KOSDAQ Intraday Seasonalilty"):
-                st.write(
-                    """
-
-                """
-                )
-
-            visualize_heatmap_seasonaliy(
-                date, 17, termflag, term, "Average_intraday", "U201"
-            )
-        with col4:
-            with st.expander("KOSDAQ Overnight Seasonalilty"):
-                st.write(
-                    """
-
-                """
-                )
-
-            visualize_heatmap_seasonaliy(
-                date, 17, termflag, term, "Average_overnight", "U201"
-            )
 
     if date and add_selectbox == "🔖트레이딩전략":
         st.header("📈트레이딩 전략")
