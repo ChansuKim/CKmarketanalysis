@@ -1198,6 +1198,7 @@ if __name__ == "__main__":
 
         except Exception as e:
             st.write("해당되는 종목이 없습니다.")
+
     if date and add_selectbox == "📅시즈널리티":
         st.header("📈시즈널리티")
         st.write("조회일 : ", date)
@@ -1222,7 +1223,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 17, termflag, term, "Average_intraday", "U001"
+                    date, 17, termflag, term, "Intraday", "U001"
                 )
             with col2:
                 with st.expander("KOSPI Day of Week Effect - Overnight"):
@@ -1233,7 +1234,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 17, termflag, term, "Average_overnight", "U001"
+                    date, 17, termflag, term, "Overnight", "U001"
                 )
             col3, col4 = st.columns(2)
             with col3:
@@ -1245,7 +1246,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 17, termflag, term, "Average_intraday", "U201"
+                    date, 17, termflag, term, "Intraday", "U201"
                 )
             with col4:
                 with st.expander("KOSDAQ Day of Week Effect - Overnight"):
@@ -1256,7 +1257,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 17, termflag, term, "Average_overnight", "U201"
+                    date, 17, termflag, term, "Overnight", "U201"
                 )
         with st.container():
             col5, col6 = st.columns(2)
@@ -1269,7 +1270,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 18, termflag, term, "Average_intraday", "U001"
+                    date, 18, termflag, term, "Intraday", "U001"
                 )
             with col6:
                 with st.expander("KOSPI Week of Month Effect- Overnight"):
@@ -1280,7 +1281,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 18, termflag, term, "Average_overnight", "U001"
+                    date, 18, termflag, term, "Overnight", "U001"
                 )
             col7, col8 = st.columns(2)
             with col7:
@@ -1292,7 +1293,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 18, termflag, term, "Average_intraday", "U201"
+                    date, 18, termflag, term, "Intraday", "U201"
                 )
             with col8:
                 with st.expander("KOSDAQ Week of Month Effect- Overnight"):
@@ -1303,7 +1304,7 @@ if __name__ == "__main__":
                     )
 
                 visualize_heatmap_seasonaliy(
-                    date, 18, termflag, term, "Average_overnight", "U201"
+                    date, 18, termflag, term, "Overnight", "U201"
                 )
 
 
