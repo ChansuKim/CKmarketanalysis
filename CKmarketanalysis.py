@@ -185,6 +185,84 @@ def plot_backtest_multiple(date, flag, termflag, term, codes):
     )
     fig.update_xaxes(tickformat="%Y-%m-%d", nticks=10)
     st.plotly_chart(fig, use_container_width=True)
+def plot_backtest_multiple_dynamic(date, flag, termflag, term):
+    fig = go.Figure()
+    data = class_data.getBacktest(date, flag, termflag, term, "")
+    # 데이터의 'logdate' 열을 datetime 형식으로 변환
+    data["logdate"] = pd.to_datetime(data["logdate"], format="%Y%m%d")
+
+    # 'logdate' 열을 제외한 나머지 컬럼을 코드로 간주
+    codes = [col for col in data.columns if col != "logdate"]
+
+    # 각 코드에 대해 그래프 추가
+    for code in codes:
+        df_price = data[["logdate", code]].dropna()
+        df_price.rename(columns={code: "ret"}, inplace=True)
+
+        fig.add_trace(
+            go.Scatter(
+                x=df_price["logdate"], y=df_price["ret"], mode="lines", name=code
+            )
+        )
+
+    # 레이아웃 업데이트
+    fig.update_layout(
+        autosize=True,
+        legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5),
+        xaxis_title="Date",
+        yaxis_title="Return",
+    )
+    fig.update_xaxes(tickformat="%Y-%m-%d", nticks=10)
+
+    # Plotly 그래프 표시
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def visualize_heatmap_seasonaliy(data, flag, termflag, term, title, code):
+    data = class_data.getBacktest(date, flag, termflag, term, code)
+
+    day_names = {2: "MON", 3: "TUE", 4: "WED", 5: "THURS", 6: "FRI"}
+
+    month_names = {
+        "01": "January",
+        "02": "February",
+        "03": "March",
+        "04": "April",
+        "05": "May",
+        "06": "June",
+        "07": "July",
+        "08": "August",
+        "09": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December",
+    }
+
+    # 월 이름 적용
+    data["month_name"] = data["month_name"].map(month_names)
+    data["day_name"] = data["day_name"].map(day_names)
+
+    # 요일 및 월별 데이터 그룹화 및 평균 계산
+    data_grouped = data.groupby(["day_name", "month_name"]).mean().reset_index()
+
+    # 피벗 테이블 생성
+    pivot_overnight = data_grouped.pivot(
+        index="day_name", columns="month_name", values=title
+    )
+
+    # 피벗 테이블이 비어 있는지 확인
+    if pivot_overnight.empty:
+        st.warning("No data available to display for Overnight Returns.")
+    else:
+        # 히트맵 생성
+        plt.figure(figsize=(12, 6))
+        sns.heatmap(pivot_overnight, annot=True, fmt=".4f", cmap="RdYlGn", center=0)
+        plt.title(title)
+        plt.xlabel("Month")
+        plt.ylabel("Day of Week")
+
+        # Streamlit에 그래프 표시
+        st.pyplot(plt)
 
 
 if __name__ == "__main__":
@@ -200,6 +278,7 @@ if __name__ == "__main__":
             "📊주식분석",
             "💹옵션분석",
             "🔖트레이딩전략",
+            "📅시즈널리티",
             "💸Systemtrading(Live)",
         ),
     )
@@ -235,7 +314,7 @@ if __name__ == "__main__":
         st.header("📰 Recently Update")
         st.markdown(
             """
-            - 캐싱작업 추가
+            - 시즈널리티 추가
         """
         )
         st.markdown("---")
@@ -1093,6 +1172,70 @@ if __name__ == "__main__":
 
         except Exception as e:
             st.write("해당되는 종목이 없습니다.")
+    if date and add_selectbox == "📅시즈널리티":
+        st.header("📈시즈널리티")
+        st.write("조회일 : ", date)
+        term, termflag = class_data.select_term_and_flag(
+            options=(
+                "1일",
+                "1주",
+                "1개월",
+                "2개월",
+                "3개월",
+                "6개월",
+                "1년",
+                "2년",
+                "3년",
+            ),
+            default_index=6,
+        )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            with st.expander("KOSPI Intraday Seasonalilty"):
+                st.write(
+                    """
+
+                """
+                )
+
+            visualize_heatmap_seasonaliy(
+                date, 17, termflag, term, "Average_intraday", "U001"
+            )
+        with col2:
+            with st.expander("KOSPI Overnight Seasonalilty"):
+                st.write(
+                    """
+
+                """
+                )
+
+            visualize_heatmap_seasonaliy(
+                date, 17, termflag, term, "Average_overnight", "U001"
+            )
+        col3, col4 = st.columns(2)
+        with col3:
+            with st.expander("KOSDAQ Intraday Seasonalilty"):
+                st.write(
+                    """
+
+                """
+                )
+
+            visualize_heatmap_seasonaliy(
+                date, 17, termflag, term, "Average_intraday", "U201"
+            )
+        with col4:
+            with st.expander("KOSDAQ Overnight Seasonalilty"):
+                st.write(
+                    """
+
+                """
+                )
+
+            visualize_heatmap_seasonaliy(
+                date, 17, termflag, term, "Average_overnight", "U201"
+            )
 
     if date and add_selectbox == "🔖트레이딩전략":
         st.header("📈트레이딩 전략")
