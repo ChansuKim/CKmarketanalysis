@@ -15,7 +15,7 @@ import matplotlib.font_manager as fm
 
 # from sqlalchemy.util._collections import LRUCache
 import streamlit.components.v1 as components
-
+import seaborn as sns
 
 def visualize_treemap(df, flag):
     font_path = "NanumBarunGothic.ttf"
