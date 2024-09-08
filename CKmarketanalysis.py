@@ -221,7 +221,7 @@ def plot_backtest_multiple_dynamic(date, flag, termflag, term):
 def visualize_heatmap_seasonaliy(data, flag, termflag, term, title, code):
     data = class_data.getBacktest(date, flag, termflag, term, code)
 
-    day_names = {2: "MON", 3: "TUE", 4: "WED", 5: "THURS", 6: "FRI"}
+    day_names = {2: "Mon", 3: "Tue", 4: "Wed", 5: "Thurs", 6: "Fri"}
 
     month_names = {
         "01": "January",
@@ -242,12 +242,17 @@ def visualize_heatmap_seasonaliy(data, flag, termflag, term, title, code):
     data["month_name"] = data["month_name"].map(month_names)
     data["day_name"] = data["day_name"].map(day_names)
 
+    day_order = [
+    "Mon","Tue", "Wed", "Thurs", "Fri"
+    ]
+    
     # 월 이름을 월별 순서로 정렬
     month_order = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ]
     data["month_name"] = pd.Categorical(data["month_name"], categories=month_order, ordered=True)
+    data["day_name"] = pd.Categorical(data["day_name"], categories=day_order, ordered=True)
 
     # 요일 및 월별 데이터 그룹화 및 평균 계산
     data_grouped = data.groupby(["day_name", "month_name"]).mean().reset_index()
