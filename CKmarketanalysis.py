@@ -256,7 +256,7 @@ def visualize_heatmap_seasonaliy(data, flag, termflag, term, title, code):
     else:
         # 히트맵 생성
         plt.figure(figsize=(12, 6))
-        sns.heatmap(pivot_overnight, annot=True, fmt=".1f%%", cmap="RdYlGn", center=0)
+        sns.heatmap(pivot_overnight, annot=True, fmt=".4f", cmap="RdYlGn", center=0)
         plt.title(title)
         plt.xlabel("Month")
         plt.ylabel("Day of Week")
