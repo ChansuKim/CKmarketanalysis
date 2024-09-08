@@ -252,7 +252,7 @@ def visualize_heatmap_seasonaliy(data, flag, termflag, term, title, code):
         "July", "August", "September", "October", "November", "December"
     ]
     data["month_name"] = pd.Categorical(data["month_name"], categories=month_order, ordered=True)
-    data["day_name"] = pd.Categorical(data["day_name"], categories=day_order, ordered=True)
+    data["day_name"] = pd.Categorical(data["day_name"], categories=day_order, ordered=False)
 
     # 요일 및 월별 데이터 그룹화 및 평균 계산
     data_grouped = data.groupby(["day_name", "month_name"]).mean().reset_index()
