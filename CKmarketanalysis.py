@@ -757,67 +757,67 @@ if __name__ == "__main__":
                 # 차트를 Streamlit에 표시합니다.
                 st.plotly_chart(fig_m, use_container_width=True)
 
-            col7, col8 = st.columns(2)
-            with col7:
-                df_kospi = class_data.getindex_fundmental(date, "KOSPI", termflag, term)
-                df_kospi["logdate"] = pd.to_datetime(
-                    df_kospi["logdate"]
-                )  # Ensure datetime is in the correct format
-                fig_d = px.line(
-                    df_kospi,
-                    x="logdate",
-                    y="per",
-                    labels={"price": "Price (Daily)"},
-                    title="KOSPI PER",
-                )
-                fig_d.update_layout(
-                    autosize=True,
-                    xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
-                )
-                st.plotly_chart(fig_d, use_container_width=True)
-                fig_d = px.line(
-                    df_kospi,
-                    x="logdate",
-                    y="pbr",
-                    labels={"price": "Price (Daily)"},
-                    title="KOSPI PBR",
-                )
-                fig_d.update_layout(
-                    autosize=True,
-                    xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
-                )
-                st.plotly_chart(fig_d, use_container_width=True)
-            with col8:
-                df_kosdaq = class_data.getindex_fundmental(
-                    date, "KOSDAQ", termflag, term
-                )
-                df_kosdaq["logdate"] = pd.to_datetime(
-                    df_kosdaq["logdate"]
-                )  # Ensure datetime is in the correct format
-                fig_d = px.line(
-                    df_kosdaq,
-                    x="logdate",
-                    y="per",
-                    labels={"price": "Price (Daily)"},
-                    title="KOSDAQ PER",
-                )
-                fig_d.update_layout(
-                    autosize=True,
-                    xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
-                )
-                st.plotly_chart(fig_d, use_container_width=True)
-                fig_d = px.line(
-                    df_kosdaq,
-                    x="logdate",
-                    y="pbr",
-                    labels={"price": "Price (Daily)"},
-                    title="KOSDAQ PBR",
-                )
-                fig_d.update_layout(
-                    autosize=True,
-                    xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
-                )
-                st.plotly_chart(fig_d, use_container_width=True)
+            # col7, col8 = st.columns(2)
+            # with col7:
+            #     df_kospi = class_data.getindex_fundmental(date, "KOSPI", termflag, term)
+            #     df_kospi["logdate"] = pd.to_datetime(
+            #         df_kospi["logdate"]
+            #     )  # Ensure datetime is in the correct format
+            #     fig_d = px.line(
+            #         df_kospi,
+            #         x="logdate",
+            #         y="per",
+            #         labels={"price": "Price (Daily)"},
+            #         title="KOSPI PER",
+            #     )
+            #     fig_d.update_layout(
+            #         autosize=True,
+            #         xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
+            #     )
+            #     st.plotly_chart(fig_d, use_container_width=True)
+            #     fig_d = px.line(
+            #         df_kospi,
+            #         x="logdate",
+            #         y="pbr",
+            #         labels={"price": "Price (Daily)"},
+            #         title="KOSPI PBR",
+            #     )
+            #     fig_d.update_layout(
+            #         autosize=True,
+            #         xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
+            #     )
+            #     st.plotly_chart(fig_d, use_container_width=True)
+            # with col8:
+            #     df_kosdaq = class_data.getindex_fundmental(
+            #         date, "KOSDAQ", termflag, term
+            #     )
+            #     df_kosdaq["logdate"] = pd.to_datetime(
+            #         df_kosdaq["logdate"]
+            #     )  # Ensure datetime is in the correct format
+            #     fig_d = px.line(
+            #         df_kosdaq,
+            #         x="logdate",
+            #         y="per",
+            #         labels={"price": "Price (Daily)"},
+            #         title="KOSDAQ PER",
+            #     )
+            #     fig_d.update_layout(
+            #         autosize=True,
+            #         xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
+            #     )
+            #     st.plotly_chart(fig_d, use_container_width=True)
+            #     fig_d = px.line(
+            #         df_kosdaq,
+            #         x="logdate",
+            #         y="pbr",
+            #         labels={"price": "Price (Daily)"},
+            #         title="KOSDAQ PBR",
+            #     )
+            #     fig_d.update_layout(
+            #         autosize=True,
+            #         xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
+            #     )
+            #     st.plotly_chart(fig_d, use_container_width=True)
 
             col11, col12 = st.columns(2)
             with col11:
