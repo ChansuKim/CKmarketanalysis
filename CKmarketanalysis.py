@@ -1547,7 +1547,8 @@ def setup_sidebar(class_data):
     st.header("📰 Recently Update")
     st.markdown(
         """
-        - 캐싱작업 추가
+        - 코드효율화
+        - 지수 PER PBR 제외
     """
     )
     st.markdown("---")
