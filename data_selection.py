@@ -23,8 +23,8 @@ class Dataselect:
     # @st.cache_resource #연결에는 resource
     def init_db(_self):
 
-        
-        connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=ODBC Driver 17 for SQL Server"
+        connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             _self.db_init = engine.connect()
@@ -244,6 +244,11 @@ class Dataselect:
                 EXEC [SL_GetInformation] ?,?,?,?,?
                 """
             params = (todate, 13, "", "", "")
+        elif flag == 4:
+            sql = """
+                EXEC [SL_GetInformation] ?,?,?,?,?
+                """
+            params = (todate, 16, "", "", "")
 
         df = pd.read_sql(sql, con=_self.db_init, params=params)
         return str(df["date"][0]).replace("-", "")
