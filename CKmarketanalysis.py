@@ -1111,7 +1111,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 17, termflag, term, "Intraday", "U001")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 17, termflag, term, "Intraday", "U001"
+            )
         with col2:
             with st.expander("KOSPI Day of Week Effect - Overnight"):
                 st.write(
@@ -1120,7 +1122,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 17, termflag, term, "Overnight", "U001")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 17, termflag, term, "Overnight", "U001"
+            )
         col3, col4 = st.columns(2)
         with col3:
             with st.expander("KOSDAQ Day of Week Effect - Intraday"):
@@ -1130,7 +1134,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 17, termflag, term, "Intraday", "U201")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 17, termflag, term, "Intraday", "U201"
+            )
         with col4:
             with st.expander("KOSDAQ Day of Week Effect - Overnight"):
                 st.write(
@@ -1139,7 +1145,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 17, termflag, term, "Overnight", "U201")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 17, termflag, term, "Overnight", "U201"
+            )
     with st.container():
         col5, col6 = st.columns(2)
         with col5:
@@ -1150,7 +1158,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 18, termflag, term, "Intraday", "U001")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 18, termflag, term, "Intraday", "U001"
+            )
         with col6:
             with st.expander("KOSPI Week of Month Effect- Overnight"):
                 st.write(
@@ -1159,7 +1169,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 18, termflag, term, "Overnight", "U001")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 18, termflag, term, "Overnight", "U001"
+            )
         col7, col8 = st.columns(2)
         with col7:
             with st.expander("KOSDAQ Week of Month Effect- Intraday"):
@@ -1169,7 +1181,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 18, termflag, term, "Intraday", "U201")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 18, termflag, term, "Intraday", "U201"
+            )
         with col8:
             with st.expander("KOSDAQ Week of Month Effect- Overnight"):
                 st.write(
@@ -1178,7 +1192,9 @@ def handle_seasonality(Main_Data, date):
                 """
                 )
 
-            visualize_heatmap_seasonaliy(date, 18, termflag, term, "Overnight", "U201")
+            visualize_heatmap_seasonaliy(
+                Main_Data, date, 18, termflag, term, "Overnight", "U201"
+            )
 
 
 # if date and add_selectbox == "🔖트레이딩전략":
@@ -1400,7 +1416,9 @@ def handle_option_analysis(Main_Data, date):
             - 옵션 프리미엄이 높아지면 양합도 높아집니다.
             """
             )
-        plot_backtest_single(date, 3, termflag, term, "0", "K200옵션등가 양합")
+        plot_backtest_single(
+            Main_Data, date, 3, termflag, term, "0", "K200옵션등가 양합"
+        )
 
     with col6:
 
@@ -1413,7 +1431,9 @@ def handle_option_analysis(Main_Data, date):
             - 비율 < 1: 시장 참가자들이 주로 콜 옵션을 매수하고 있음을 의미하며, 이는 시장의 상승에 대한 기대가 더 많음을 나타낼 수 있습니다.
             """
             )
-        plot_backtest_single(date, 4, termflag, term, "0", "등가 Put-Call 거래량 비율")
+        plot_backtest_single(
+            Main_Data, date, 4, termflag, term, "0", "등가 Put-Call 거래량 비율"
+        )
 
     option_metrics = {
         "priceclose": "Price",
