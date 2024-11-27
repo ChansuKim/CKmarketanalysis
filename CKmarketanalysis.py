@@ -1230,6 +1230,7 @@ def handle_trading_strategy(Main_Data, date):
             )
 
         plot_backtest_multiple(
+            Main_Data,
             date,
             1,
             termflag,
@@ -1251,6 +1252,7 @@ def handle_trading_strategy(Main_Data, date):
             )
 
         plot_backtest_multiple(
+            Main_Data,
             date,
             6,
             termflag,
@@ -1271,6 +1273,7 @@ def handle_trading_strategy(Main_Data, date):
             )
 
         plot_backtest_multiple(
+            Main_Data,
             date,
             5,
             termflag,
@@ -1289,6 +1292,7 @@ def handle_trading_strategy(Main_Data, date):
             )
 
         plot_backtest_multiple(
+            Main_Data,
             date,
             7,
             termflag,
@@ -1309,6 +1313,7 @@ def handle_trading_strategy(Main_Data, date):
             )
 
         plot_backtest_multiple(
+            Main_Data,
             date,
             8,
             termflag,
@@ -1330,6 +1335,7 @@ def handle_trading_strategy(Main_Data, date):
             )
 
         plot_backtest_multiple(
+            Main_Data,
             date,
             9,
             termflag,
@@ -1349,7 +1355,12 @@ def handle_trading_strategy(Main_Data, date):
             """
             )
         plot_backtest_multiple(
-            date, 10, termflag, term, {"U001": "KOSPI ORB", "U201": "KOSDAQ ORB"}
+            Main_Data,
+            date,
+            10,
+            termflag,
+            term,
+            {"U001": "KOSPI ORB", "U201": "KOSDAQ ORB"},
         )
     with col8:
         with st.expander("VWAP Trend"):
@@ -1361,7 +1372,14 @@ def handle_trading_strategy(Main_Data, date):
             - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351
             """
             )
-        # plot_backtest_multiple(date, 12, termflag, term, {'U001': 'KOSPI VWAP Trend', 'U201': 'KOSDAQ VWAP Trend'})
+        plot_backtest_multiple(
+            Main_Data,
+            date,
+            12,
+            termflag,
+            term,
+            {"U001": "KOSPI VWAP Trend", "U201": "KOSDAQ VWAP Trend"},
+        )
 
     col9, col10 = st.columns(2)
     with col9:
@@ -1374,7 +1392,14 @@ def handle_trading_strategy(Main_Data, date):
             - 종가에 이 비율이 높은 상위 10%는 롱, 낮은 10%는 숏 하고, 다음 날 종가에 엑싯합니다.
             """
             )
-        plot_backtest_multiple(date, 13, termflag, term, {"U001": "OS Portfolio"})
+        plot_backtest_multiple(
+            Main_Data,
+            date,
+            13,
+            termflag,
+            term,
+            {"U001": "OS Portfolio"},
+        )
     with col10:
         with st.expander("Timing Momentum strategy"):
             st.write(
@@ -1387,7 +1412,12 @@ def handle_trading_strategy(Main_Data, date):
                 """
             )
         plot_backtest_multiple(
-            date, 14, termflag, term, {"1": "Timing momentum", "2": "momentum"}
+            Main_Data,
+            date,
+            14,
+            termflag,
+            term,
+            {"1": "Timing momentum", "2": "momentum"},
         )
     col11, col12 = st.columns(2)
     with col11:
@@ -1397,7 +1427,7 @@ def handle_trading_strategy(Main_Data, date):
             - test
                 """
             )
-        plot_backtest_multiple_dynamic(date, 15, termflag, term)
+        plot_backtest_multiple_dynamic(Main_Data, date, 15, termflag, term)
 
 
 # if date and add_selectbox == "💹옵션분석":
