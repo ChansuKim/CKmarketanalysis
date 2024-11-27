@@ -19,7 +19,7 @@ class Dataselect:
         self.user_id = user_id
         self.password = password
         self.date = date
-
+        self.db_init = self.init_db()
     # @st.cache_resource #연결에는 resource
     def init_db(_self):
 
