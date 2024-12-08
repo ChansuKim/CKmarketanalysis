@@ -1397,14 +1397,14 @@ def handle_trading_strategy(Main_Data, date):
             - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351
             """
             )
-        plot_backtest_multiple(
-            Main_Data,
-            date,
-            12,
-            termflag,
-            term,
-            {"U001": "KOSPI VWAP Trend", "U201": "KOSDAQ VWAP Trend"},
-        )
+        # plot_backtest_multiple(
+        #     Main_Data,
+        #     date,
+        #     12,
+        #     termflag,
+        #     term,
+        #     {"U001": "KOSPI VWAP Trend", "U201": "KOSDAQ VWAP Trend"},
+        # )
 
     col9, col10 = st.columns(2)
     with col9:
