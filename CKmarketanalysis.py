@@ -315,7 +315,9 @@ def visualize_heatmap_seasonaliy(class_data, date, flag, termflag, term, title, 
     )
 
     # 요일 및 월별 데이터 그룹화 및 평균 계산
-    data_grouped = data.groupby(["day_name", "month_name"]).mean().reset_index()
+    data_grouped = (
+        data.groupby(["day_name", "month_name"], observed=True).mean().reset_index()
+    )
 
     # 피벗 테이블 생성
     pivot_overnight = data_grouped.pivot(
@@ -474,18 +476,29 @@ def handle_system_trading(class_data, date):
 
         with col2:
             df_price = class_data.getstockprice(date, selected_stock, "D")
-            df_price["logdate"] = pd.to_datetime(
-                df_price["logdate"]
-            )  # Ensure datetime is in the correct format
-            fig_d = px.line(
+            df_price["logdate"] = pd.to_datetime(df_price["logdate"])
+            fig_d = class_data.create_candlestick_chart(
                 df_price,
-                x="logdate",
-                y="close",
-                labels={"price": "Price (Daily)"},
-                title="Daily Price Trends",
+                "Daily Candlestick Chart",
+                "date",  # x축 컬럼명 변경
+                "price",  # y축 컬럼명 변경
             )
-            fig_d.update_layout(autosize=True)
             st.plotly_chart(fig_d, use_container_width=True)
+
+        # with col2:
+        #     df_price = class_data.getstockprice(date, selected_stock, "D")
+        #     df_price["logdate"] = pd.to_datetime(
+        #         df_price["logdate"]
+        #     )  # Ensure datetime is in the correct format
+        #     fig_d = px.line(
+        #         df_price,
+        #         x="logdate",
+        #         y="close",
+        #         labels={"price": "Price (Daily)"},
+        #         title="Daily Price Trends",
+        #     )
+        #     fig_d.update_layout(autosize=True)
+        #     st.plotly_chart(fig_d, use_container_width=True)
 
 
 # if date and add_selectbox == "🌟대시보드":
@@ -1025,19 +1038,30 @@ def handle_stock_analysis(Main_Data, date):
 
         with col8:
             df_price = Main_Data.getstockprice(chartdate, selected_stock, "D")
-            df_price["logdate"] = pd.to_datetime(
-                df_price["logdate"]
-            )  # Ensure datetime is in the correct format
-            fig_d = px.line(
+            df_price["logdate"] = pd.to_datetime(df_price["logdate"])
+            fig_d = Main_Data.create_candlestick_chart(
                 df_price,
-                x="logdate",
-                y="close",
-                labels={"price": "Price (Daily)"},
-                title="Daily Price Trends(From a month ago to " + str(chartdate) + ")",
+                "Daily Candlestick Chart(1Y)",
+                "date",  # x축 컬럼명 변경
+                "price",  # y축 컬럼명 변경
             )
-            fig_d.update_layout(autosize=True)
-            fig_d.update_xaxes(tickformat="%Y-%m-%d", nticks=10)
             st.plotly_chart(fig_d, use_container_width=True)
+
+        # with col8:
+        #     df_price = Main_Data.getstockprice(chartdate, selected_stock, "D")
+        #     df_price["logdate"] = pd.to_datetime(
+        #         df_price["logdate"]
+        #     )  # Ensure datetime is in the correct format
+        #     fig_d = px.line(
+        #         df_price,
+        #         x="logdate",
+        #         y="close",
+        #         labels={"price": "Price (Daily)"},
+        #         title="Daily Price Trends(From a month ago to " + str(chartdate) + ")",
+        #     )
+        #     fig_d.update_layout(autosize=True)
+        #     fig_d.update_xaxes(tickformat="%Y-%m-%d", nticks=10)
+        #     st.plotly_chart(fig_d, use_container_width=True)
 
         if condition_choice == "유상증자":
             text = Main_Data.getgongsi(date, 1, selected_stock)
@@ -1547,14 +1571,14 @@ def setup_sidebar(class_data):
     st.header("📰 Recently Update")
     st.markdown(
         """
-        - 코드효율화
-        - 지수 PER PBR 제외
+        - 일별수익률 캔들스틱차트로 변경
+        - 거래량 바차트 추가
     """
     )
     st.markdown("---")
     # 연락처 섹션
     st.header("📞 Contact")
-    st.write("📧 chansoookim@naver.com")
+    st.write("📧 chansooo.kim@gmail.com")
     st.markdown("🔗 [LinkedIn](https://www.linkedin.com/in/chansoookim)")
     st.markdown("📝 [Blog](https://blog.naver.com/chansoookim)")
     # 추가적인 스타일링 요소

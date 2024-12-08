@@ -6,7 +6,7 @@ from datetime import datetime
 import plotly.graph_objects as go
 import streamlit as st
 import plotly.express as px
-
+from plotly.subplots import make_subplots
 
 showErrorDetails = False
 
@@ -20,10 +20,12 @@ class Dataselect:
         self.password = password
         self.date = date
         self.db_init = self.init_db()
+
     # @st.cache_resource #연결에는 resource
     def init_db(_self):
 
-        connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=ODBC Driver 17 for SQL Server"
+        connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=SQL+Server"
+        # connection_string = f"mssql+pyodbc://{_self.user_id}:{_self.password}@{_self.server}/{_self.database}?driver=ODBC Driver 17 for SQL Server"
         engine = create_engine(connection_string, echo=False)
         try:
             _self.db_init = engine.connect()
@@ -58,7 +60,7 @@ class Dataselect:
     def getstockprice(_self, date, code, frame):
         todate = int(str(date).replace("-", ""))
         if frame == "D":
-            frdate = _self.getCalendar(todate, "m", "1")
+            frdate = _self.getCalendar(todate, "m", "12")
             sql = "EXEC [SL_Getstockreturn] ?,?,?,?"
             params = (frdate, "", code, int(5))
             df = pd.read_sql(sql, con=_self.db_init, params=params)
@@ -412,27 +414,54 @@ class Dataselect:
         else:
             raise ValueError("DataFrame must have 'datetime' or 'logdate' columns")
 
-        # 캔들스틱 차트 생성
-        fig = go.Figure(
-            data=[
-                go.Candlestick(
-                    x=x_values,
-                    open=df["open"],
-                    high=df["high"],
-                    low=df["low"],
-                    close=df["close"],
-                    increasing_line_color="red",
-                    decreasing_line_color="green",
-                )
-            ]
+        # 캔들스틱 차트와 거래량 차트 생성
+        fig = make_subplots(
+            rows=2,
+            cols=1,
+            shared_xaxes=True,
+            vertical_spacing=0.03,
+            row_heights=[0.7, 0.3],
         )
+
+        # 캔들스틱 차트 추가
+        fig.add_trace(
+            go.Candlestick(
+                x=x_values,
+                open=df["open"],
+                high=df["high"],
+                low=df["low"],
+                close=df["close"],
+                increasing_line_color="red",
+                decreasing_line_color="green",
+                name="price",
+            ),
+            row=1,
+            col=1,
+        )
+
+        # 거래량 바 차트 추가
+        colors = [
+            "red" if row["close"] >= row["open"] else "green"
+            for index, row in df.iterrows()
+        ]
+        fig.add_trace(
+            go.Bar(x=x_values, y=df["volume"], marker_color=colors, name="volume"),
+            row=2,
+            col=1,
+        )
+
+        # 차트 레이아웃 설정
         fig.update_layout(
             title=title,
-            xaxis_title=x_label,
             yaxis_title=y_label,
+            yaxis2_title="volume",
+            xaxis2_title=x_label,
             autosize=True,
+            xaxis_rangeslider_visible=False,
             xaxis=dict(tickmode="auto", nticks=10, tickformat=tick_format),
+            xaxis2=dict(tickmode="auto", nticks=10, tickformat=tick_format),
         )
+
         return fig
 
     def create_line_chart(self, df, title, x_label, y_label):
