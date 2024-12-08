@@ -18,6 +18,7 @@ import seaborn as sns
 # from sqlalchemy.util._collections import LRUCache
 # import streamlit.components.v1 as components
 
+
 # 상수 정의
 MENU_OPTIONS = {
     "🌟대시보드": "dashboard",
