@@ -43,7 +43,7 @@ class Dataselect:
         frdate = int(df["frdate"][0])
         return frdate
 
-    # @st.cache_data  #데이터 가져오는 것에는 data
+    @st.cache_data  #데이터 가져오는 것에는 data
     def getBacktest(_self, date, flag, termflag, term, etc):
         todate = int(str(date).replace("-", ""))
         sql = """
