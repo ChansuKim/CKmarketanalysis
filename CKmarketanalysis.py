@@ -713,7 +713,7 @@ def handle_market_analysis(Main_Data, date):
 
             df_price = Main_Data.getindexprice(date, "u001", "D", termflag, term)
             df_price["logdate"] = pd.to_datetime(df_price["logdate"])
-            print(df_price)
+            # print(df_price)
             fig_m = Main_Data.create_candlestick_chart(
                 df_price, "Daily KOSPI Candestick Chart", "date", "price"
             )
