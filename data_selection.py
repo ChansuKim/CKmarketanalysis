@@ -10,7 +10,6 @@ from plotly.subplots import make_subplots
 
 showErrorDetails = False
 
-
 class Dataselect:
 
     def __init__(self, date, server, database, user_id, password):
