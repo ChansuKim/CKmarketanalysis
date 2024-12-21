@@ -43,7 +43,7 @@ class Dataselect:
         frdate = int(df["frdate"][0])
         return frdate
 
-    @st.cache_data  #데이터 가져오는 것에는 data
+    @st.cache_data  # 데이터 가져오는 것에는 data
     def getBacktest(_self, date, flag, termflag, term, etc):
         todate = int(str(date).replace("-", ""))
         sql = """
@@ -389,6 +389,23 @@ class Dataselect:
         # todate = int(str(date).replace('-',''))
         sql = "EXEC [SL_Getstockreturn] ?,?,?,?"
         params = ("", "", code, int(12))
+        df = pd.read_sql(sql, con=_self.db_init, params=params)
+        return df
+
+    @st.cache_data  # 데이터 가져오는 것에는 data
+    def get_InvestorsbyStock(_self, date, code):
+        todate = int(str(date).replace("-", ""))
+        frdate = _self.getCalendar(todate, "m", "1")
+        sql = "EXEC [SL_Getstockreturn] ?,?,?,?"
+        params = (frdate, todate, code, int(19))
+        df = pd.read_sql(sql, con=_self.db_init, params=params)
+        return df
+
+    @st.cache_data  # 데이터 가져오는 것에는 data
+    def get_Sugup_depth(_self, date, code):
+        todate = int(str(date).replace("-", ""))
+        sql = "EXEC [SL_Getstockreturn] ?,?,?,?"
+        params = ("", todate, code, int(20))
         df = pd.read_sql(sql, con=_self.db_init, params=params)
         return df
 

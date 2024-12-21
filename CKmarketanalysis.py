@@ -235,15 +235,16 @@ def plot_backtest_multiple_dynamic(class_data, date, flag, termflag, term):
     fig = go.Figure()
     data = class_data.getBacktest(date, flag, termflag, term, "")
     # 데이터의 'logdate' 열을 datetime 형식으로 변환
-    data["logdate"] = pd.to_datetime(data["logdate"], format="%Y%m%d")
+    data.loc[:, "logdate"] = pd.to_datetime(data["logdate"], format="%Y%m%d")
 
     # 'logdate' 열을 제외한 나머지 컬럼을 코드로 간주
     codes = [col for col in data.columns if col != "logdate"]
 
     # 각 코드에 대해 그래프 추가
     for code in codes:
-        df_price = data[["logdate", code]].dropna()
-        df_price.rename(columns={code: "ret"}, inplace=True)
+        df_price = data[["logdate", code]].copy()  # .copy()를 사용하여 명시적 복사
+        df_price.loc[:, "ret"] = df_price[code]  # .loc를 사용하여 할당
+        df_price = df_price.dropna()
 
         fig.add_trace(
             go.Scatter(
@@ -476,7 +477,7 @@ def handle_system_trading(class_data, date):
 
         with col2:
             df_price = class_data.getstockprice(date, selected_stock, "D")
-            df_price["logdate"] = pd.to_datetime(df_price["logdate"])
+            df_price.loc[:, "logdate"] = pd.to_datetime(df_price["logdate"])
             fig_d = class_data.create_candlestick_chart(
                 df_price,
                 "Daily Candlestick Chart",
@@ -1039,7 +1040,7 @@ def handle_stock_analysis(Main_Data, date):
 
         with col8:
             df_price = Main_Data.getstockprice(chartdate, selected_stock, "D")
-            df_price["logdate"] = pd.to_datetime(df_price["logdate"])
+            df_price.loc[:, "logdate"] = pd.to_datetime(df_price["logdate"])
             fig_d = Main_Data.create_candlestick_chart(
                 df_price,
                 "Daily Candlestick Chart(1Y)",
@@ -1047,6 +1048,84 @@ def handle_stock_analysis(Main_Data, date):
                 "price",  # y축 컬럼명 변경
             )
             st.plotly_chart(fig_d, use_container_width=True)
+
+        col9, col10 = st.columns(2)
+        with col9:
+            df_price = Main_Data.get_InvestorsbyStock(chartdate, selected_stock)
+            df_price["logdate"] = pd.to_datetime(df_price["logdate"])
+            fig_d = px.line(
+                df_price,
+                x="logdate",
+                y=df_price.columns,
+                labels={"price": "Price (Daily)"},
+                title="Investors(1M)",
+            )
+            fig_d.update_layout(
+                autosize=True,
+                legend=dict(
+                    orientation="h", yanchor="bottom", y=-1, xanchor="center", x=0.5
+                ),
+                xaxis=dict(tickmode="auto", nticks=10, tickformat="%Y-%m-%d"),
+            )
+            st.plotly_chart(fig_d, use_container_width=True)
+
+        with col10:
+            df_sugup = Main_Data.get_Sugup_depth(chartdate, selected_stock)
+
+            # 수급 데이터 시각화
+            fig = go.Figure()
+
+            # 매수/매도/순매수 바 차트 추가
+            categories = ["개인", "외국인", "기관"]
+
+            # 매수 바
+            fig.add_trace(
+                go.Bar(
+                    name="매수",
+                    x=categories,
+                    y=df_sugup["buy"],
+                    marker_color="red",
+                    opacity=0.7,
+                )
+            )
+
+            # 매도 바
+            fig.add_trace(
+                go.Bar(
+                    name="매도",
+                    x=categories,
+                    y=df_sugup["sell"],
+                    marker_color="blue",
+                    opacity=0.7,
+                )
+            )
+
+            # 순매수 라인
+            fig.add_trace(
+                go.Scatter(
+                    name="순매수",
+                    x=categories,
+                    y=df_sugup["netbuy"],
+                    mode="lines+markers",
+                    line=dict(color="green", width=2),
+                    marker=dict(size=8),
+                )
+            )
+
+            # 레이아웃 설정
+            fig.update_layout(
+                title="투자자별 매매 동향",
+                barmode="group",
+                yaxis_title="거래량",
+                showlegend=True,
+                legend=dict(
+                    orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5
+                ),
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            # st.dataframe(df_price, use_container_width=True, hide_index=True)
 
         # with col8:
         #     df_price = Main_Data.getstockprice(chartdate, selected_stock, "D")
@@ -1431,7 +1510,7 @@ def handle_trading_strategy(Main_Data, date):
                 """
             **Timing Momentum strategy 전략 설명:**
             - 전월 12개월 수익률이 높은 상위 10% 주식은 승자 포트폴리오로, 하위 10% 주식은 패자 포트폴리오로 분류합니다.
-            - 3주 수익률 신호를 활용하여 승자 포트폴리오와 패자 포트폴리오의 적절한 매수 및 매도 시점을 결정합니다.
+            - 3주 수익률 신호를 활용하여 승자 포트폴리오와 패자 포트폴리오의 적절한 매수 및 매도 시점�� 결정합니다.
             - 승자 포트폴리오내 종목의 3주 수익률이 0보다 높으면 해당 종목을 매수합니다.
             - 패자 포트폴리오의 종목의 3주 수익률이 0보다 낮으면 해당 종목을 매도합니다
                 """
@@ -1574,6 +1653,7 @@ def setup_sidebar(class_data):
         """
         - 일별수익률 캔들스틱차트로 변경
         - 거래량 바차트 추가
+        - 수급차트 추가
     """
     )
     st.markdown("---")
